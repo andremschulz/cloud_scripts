@@ -1,0 +1,25 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+set password [lindex $argv 0]
+ 
+spawn mysql_secure_installation
+ 
+expect "Enter current password*"
+send -- "\r"
+expect "Set root password*"
+send -- "Y\r"
+expect "New password:"
+send -- "$password\r"
+expect "Re-enter new password:"
+send -- "$password\r"
+expect "Remove anonymous users?*"
+send -- "Y\r"
+expect "Disallow root login remotely?*"
+send -- "Y\r"
+expect "Remove test database*"
+send -- "Y\r"
+expect "Reload privilege tables*"
+send -- "Y\r"
+ 
+expect eof
