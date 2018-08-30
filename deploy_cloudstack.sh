@@ -1,19 +1,19 @@
-!#/bin/bash
+#!/bin/bash
 ## Cloudstack auto-deployment script for Centos 7.
 ## place deploy_cloudstack.sh and mysql_secure files in one directory and give them execute rights.
 ## Set Vars below and execute ./deploy_cloudstack.sh
 
 ## Defining vars
-WORK_DIR = "/tmp"
-FQDN = "cloudstack.domain.int"		## host FQDN
-ntp_1 = "0.0.0.0"					## first ntp server to sync
-ntp_2 = "0.0.0.0"					## second ntp server to sync
-db_root_password = "root"			## mariadb root password
-db_cloud_password = "cloud"         ## password for mariadb cloudstack user cloud
+WORK_DIR="/tmp"
+FQDN="cloudstack.domain.int"		## host FQDN
+ntp_1="0.0.0.0"					## first ntp server to sync
+ntp_2="0.0.0.0"					## second ntp server to sync
+db_root_password="root"			## mariadb root password
+db_cloud_password="cloud"         ## password for mariadb cloudstack user cloud
 
 ## Installing prerequisites
 printf "\n############### PREREQUISITES ################\n"
-yum install expect -y
+yum install expect -y -q
 
 ## Disable SELINUX
 printf "\n############### SELINUX CONFIG ################\n"
@@ -34,11 +34,12 @@ hostname --fqdn
 
 ## Configure ntp
 printf "\n############### NTP CONFIG ################\n"
-yum install ntp -y
+yum install ntp -y -q
 sytemctl enable ntpd 2>/dev/null
 sed -i "s/0.centos.pool.ntp.org/$ntp_1/g" /etc/ntp.conf /etc/ntp.conf
 sed -i "s/1.centos.pool.ntp.org/$ntp_2/g" /etc/ntp.conf /etc/ntp.conf
 systemctl start ntpd
+timedatectl set-timezone Europe/Sofia
 ntpq -p
 date -R
 
@@ -55,7 +56,7 @@ cat /etc/yum.repos.d/cloudstack.repo
 
 ## Configure database
 printf "\n############### DATABASE CONFIG ################\n"
-yum install mariadb mariadb-server -y
+yum install mariadb mariadb-server -y -q
 grep  'binlog-format' /etc/my.cnf 2> /dev/null
 if [ $? == '1' ]; then 
 	sed "/mysql.sock/a innodb_rollback_on_timeout=1\ninnodb_lock_wait_timeout=600\nmax_connections=350\nlog-bin=mysql-bin\nbinlog-format = 'ROW'" /etc/my.cnf
@@ -67,7 +68,7 @@ mysql_secure $db_root_password
 
 ## Install Cloudstack
 printf "\n############### CLOUDSTACK CONFIG ################\n"
-yum install cloudstack-management -y
+yum install cloudstack-management -y -q
 cloudstack-setup-databases cloud:$db_cloud_password@localhost --deploy-as=root:$db_root_password
 cloudstack-setup-management
 #wget http://download.cloudstack.org/tools/vhd-util -P $WORK_DIR
