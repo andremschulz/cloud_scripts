@@ -13,7 +13,9 @@ db_cloud_password="cloud"         ## password for mariadb cloudstack user cloud
 
 ## Installing prerequisites
 printf "\n############### PREREQUISITES ################\n"
-yum install expect -y -q
+yum install expect epel-release -y -q
+yum repolist
+yum install mysql-connector-python -y -q
 
 ## Disable SELINUX
 printf "\n############### SELINUX CONFIG ################\n"
@@ -64,7 +66,7 @@ fi
 systemctl enable mariadb 2>/dev/null
 systemctl start mariadb 2>/dev/null
 systemctl status mariadb
-mysql_secure $db_root_password
+./mysql_secure $db_root_password
 
 ## Install Cloudstack
 printf "\n############### CLOUDSTACK CONFIG ################\n"
