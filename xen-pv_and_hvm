@@ -1,0 +1,7 @@
+
+## PV to HVM
+xe vm-param-set uuid=6bf5eda4-2dda-84d9-220f-f02a6132b6d0 HVM-boot-policy="BIOS order" PV-args="" PV-bootloader-args="" HVM-boot-params:order="dc" PV-bootloader=""
+
+
+## HVM to PV
+xe vm-param-set uuid=6bf5eda4-2dda-84d9-220f-f02a6132b6d0 HVM-boot-policy="" PV-args="hvc0" PV-bootloader-args="pygrub"
