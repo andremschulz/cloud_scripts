@@ -73,5 +73,5 @@ printf "\n############### CLOUDSTACK CONFIG ################\n"
 yum install cloudstack-management -y -q
 cloudstack-setup-databases cloud:$db_cloud_password@localhost --deploy-as=root:$db_root_password
 cloudstack-setup-management
-#wget http://download.cloudstack.org/tools/vhd-util -P $WORK_DIR
-#yes | cp $WORK_DIR/vhd-util /usr/share/cloudstack-common/scripts/vm/hypervisor/xenserver/vhd-util
+wget http://download.cloudstack.org/tools/vhd-util -P $WORK_DIR
+yes | cp $WORK_DIR/vhd-util /usr/share/cloudstack-common/scripts/vm/hypervisor/xenserver/vhd-util
