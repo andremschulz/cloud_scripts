@@ -24,9 +24,12 @@ setenforce permissive
 sestatus
 
 ## Disable firewalld
-systemctl disable firewalld 2>/dev/null
-systemctl stop firewalld 2>/dev/null
+#systemctl disable firewalld 2>/dev/null
+#systemctl stop firewalld 2>/dev/null
 printf "\n############### FIREWALL CONFIG ################\n"
+firewall-cmd --zone=public --add-port=8080/tcp --permanent
+firewall-cmd reload
+printf "port 8080 tcp enabled"
 systemctl status firewalld
 
 ## Configure FQDN
