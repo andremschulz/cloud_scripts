@@ -48,14 +48,13 @@ date -R
 ## Configure cloudstack repo
 printf "\n############### YUM CONFIG ################\n"
 rpm --import http://packages.shapeblue.com/release.asc
-echo "[cloudstack-4.11]
+echo "[cloudstack]
 name=cloudstack
-baseurl=http://packages.shapeblue.com/cloudstack/upstream/centos7/4.11
+baseurl=http://download.cloudstack.org/centos/$releasever/4.12/
 enabled=1
-gpgcheck=1
-gpgkey=http://packages.shapeblue.com/release.asc" > /etc/yum.repos.d/cloudstack.repo
+gpgcheck=0" > /etc/yum.repos.d/cloudstack.repo
 cat /etc/yum.repos.d/cloudstack.repo
-
+#gpgkey=http://packages.shapeblue.com/release.asc
 ## Configure database
 printf "\n############### DATABASE CONFIG ################\n"
 yum install mariadb mariadb-server -y -q
