@@ -1,0 +1,20 @@
+#!/usr/bin/expect
+
+set slave_ip [lindex $argv 0]
+set pass [lindex $argv 1]
+set timeout 30
+
+spawn scp scripts/iptables root@$slave_ip:/etc/sysconfig/iptables
+expect "*assword:" { send "$pass\r" }
+spawn scp scripts/snmpd.conf root@$slave_ip:/etc/snmp/snmpd.conf
+expect "*assword:" { send "$pass\r" }
+spawn scp scripts/ssmtp.conf root@$slave_ip:/etc/ssmtp/ssmtp.conf
+expect "*assword:" { send "$pass\r" }
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip systemctl restart iptables.service snmpd.service
+expect "*assword:" { send "$pass\r" }
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip systemctl enable snmpd.service
+expect "*assword:" { send "$pass\r" }
+sleep 2
+exit
+interact
+

@@ -1,0 +1,4 @@
+declare -A vlans=(
+["0000"]="Network name1, vlan 0000, network x.x.x.x/x"
+["1111"]="Network name2, vlan 1111, network x.x.x.x/x"
+)

@@ -1,0 +1,28 @@
+#!/usr/bin/expect
+
+set slave_ip [lindex $argv 0]
+set pass [lindex $argv 1]
+set timeout 30
+
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip mkdir /opt/script
+expect "*assword:" { send "$pass\r" }
+spawn scp scripts/vm_backup.sh root@$slave_ip:/opt/scripts/
+expect "*assword:" { send "$pass\r" }
+spawn scp scripts/iptables root@$slave_ip:/etc/sysconfig/iptables
+expect "*assword:" { send "$pass\r" }
+spawn scp scripts/ssmtp.conf root@$slave_ip:/etc/ssmtp/ssmtp.conf
+expect "*assword:" { send "$pass\r" }
+spawn scp scripts/xenserver.conf  root@$slave_ip:/etc/rsyslog.d/xenserver.conf
+expect "*assword:" { send "$pass\r" }
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip systemctl restart rsyslog.service
+expect "*assword:" { send "$pass\r" }
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip sed -i.bak '/vm_backup/d' /etc/crontab
+expect "*assword:" { send "$pass\r" }
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip echo "00 4 * * * root /opt/scripts/vm_backup.sh -t daily_backup -k 7 -x `xe sr-list name-label=backup\ daily params=uuid |cut -d ":" -f 2 |sed 's/ //g'`  -m  backup.team@tracksystem.info" >> /etc/crontab
+expect "*assword:" { send "$pass\r" }
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip echo "0 16 * * 6 root /opt/scripts/vm_backup.sh -t backup -k 2 -x `xe sr-list name-label=backup\ weekly params=uuid |cut -d ":" -f 2 |sed 's/ //g'` -m  backup.team@tracksystem.info" >> /etc/crontab
+expect "*assword:" { send "$pass\r" }
+
+sleep 2
+exit
+interact

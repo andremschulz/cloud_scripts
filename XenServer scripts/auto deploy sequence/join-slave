@@ -1,0 +1,14 @@
+#!/usr/bin/expect
+
+set slave_ip [lindex $argv 0]
+set host_ip [lindex $argv 1]
+set pass [lindex $argv 2]
+set timeout 30
+
+spawn ssh -oStrictHostKeyChecking=no -oCheckHostIP=no root@$slave_ip
+expect "*assword:" { send "$pass\r" }
+expect "*#" { send "xe pool-join master-address=$host_ip master-username=root master-password=$pass\r" }
+sleep 10
+exit
+interact
+

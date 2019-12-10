@@ -1,0 +1,6 @@
+To: yourmail@gmail.com
+From: mymail@gmail.com
+Subject: alert
+
+	Test server is down! Maika mu mechka!
+
