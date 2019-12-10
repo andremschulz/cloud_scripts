@@ -1,0 +1,49 @@
+#!/bin/bash
+
+uuids=( "981b624e-1618-4062-bc4d-9a2bf08888c0"
+"5f4b9527-9ec3-f132-d175-affa1f7e877a"
+"58300dd3-bacc-9c41-3939-b4d18be5b15b"
+"7db67e88-b8ed-d487-ad74-3a4dde45446a"
+"b348cb8e-dd93-04c8-3917-ebafba7120ba"
+"45ad7924-6c9d-631c-1761-4ffffeddbe67"
+"75bdea9f-8114-0b95-4a3c-a4a7ba865d5f"
+"0ffdc6cc-ed07-3501-d09d-22d4f10bd8ef"
+"ef5156e8-08e1-5a5e-c67f-ac199d7c4a0a" 
+"16ab4ec4-a4af-aa3d-a59a-4c3fa7b0b56b"
+"b1e4d28d-915c-24b1-0158-c9d7c38bb404"
+"8c0c5567-08e0-dd41-73a5-62bb088ac01c"
+"344908d4-5e4f-1e81-a368-74a59c1a5bdb"
+"07402cf5-fe65-c70e-7225-6b77253ce4d4"
+"2ea679b4-d74c-dbcc-b859-661708cd1701"
+"fef25c88-78f6-813f-5b54-2464be3f8c9c"
+"518f7074-c274-225f-948b-ce1bc97d5d1c"
+"31b060ed-0c27-df8c-9cd1-cb67a330e0b1"
+"713bfb8f-e9bd-69df-6ea0-ce1011292e2c" 
+"4b71eb08-0127-cf1d-8c43-2c1fa6e73eb9"
+"934a6e6b-ad61-de52-09cf-e960cc528ead"
+"10769000-4a72-c2d0-e3c4-dae2d6ead8a0"
+"82331aea-a109-d2ec-4ed9-689ef63c81d8"
+"ed936a72-ee51-e6c1-4b1a-8651a839c888"
+"19fd6ac4-fcfd-1248-5fb2-25907dd6f4a1"
+"c475e9f0-e9ef-0b67-59d7-73875c862c2a"
+"ca114efc-d28e-b0cf-ee9b-b1564f830e3d"
+"e054d83c-2a5f-11c1-8b6a-815f27e9b234"
+"f47fc7f2-c01a-3b5e-f7db-a067953e1eb2"
+"7e3ac3b9-fbfc-f745-e2da-5f34ff8fd0e5"
+"63afbd48-4991-4b3f-ddf2-5bdd1dc57b86"
+"1b40de9d-635a-0bea-e88b-af2b45bfc980"
+"466d1576-f234-5986-20fb-1c296436d567"
+"944a9c8a-acbc-4b7b-09c4-a345ab392780"
+"60c37cf1-4249-11c1-55e1-b4ead9f0e2a8"
+"ce7076fd-03fb-45a7-1ea0-d60dd8f9c5c8"
+"952882c6-46dd-67ef-82a0-954b7090e602"
+"643b088b-9b3c-0a21-86ef-d092838b9943" )
+
+for i in "${arrayName[@]}"
+do
+   result=`xe vm-list uuid=$i`
+   echo $result
+done
+
+ list_domains | grep b0f2a386-2f58-92ce-0509-ff3bf111758c
+ 
