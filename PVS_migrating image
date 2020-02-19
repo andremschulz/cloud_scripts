@@ -1,0 +1,15 @@
+@echo off
+
+REM ========================================================================
+REM Filename: S2016 vDisk.cmd
+REM Date: 2015-01-20
+REM Version: 1.0
+REM Author: Alexander Kafedzhiev
+REM Purpose: Replicates the vhd and avhd files for S2016 vDisk, excludes .lok files.
+REM =========================================================================
+
+For /f "tokens=1-4 delims=/ " %%a in ('date /t') do (set mydate=%%c-%%a-%%b)
+For /f "tokens=1-2 delims=/:" %%a in ('time /t') do (set mytime=%%a%%b)
+
+ROBOCOPY D:\GoldenImage \\3DC-PVS01.corp.int\D$\GoldenImage "S2016-vDisk.*" /XF *.lok /W:O /R:0 /SEC /MT:16 /V /LOG:"D:\vDisk Replication\S2016_vDisk_%mydate%_%mytime%.log"
+pause
