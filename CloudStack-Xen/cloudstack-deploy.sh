@@ -53,7 +53,7 @@ printf "\n############### YUM CONFIG ################\n"
 rpm --import http://packages.shapeblue.com/release.asc
 echo "[cloudstack]
 name=cloudstack
-baseurl=http://download.cloudstack.org/centos/$releasever/4.12/
+baseurl=http://packages.shapeblue.com/cloudstack/upstream/centos7/4.14
 enabled=1
 gpgcheck=0" > /etc/yum.repos.d/cloudstack.repo
 cat /etc/yum.repos.d/cloudstack.repo
