@@ -60,20 +60,23 @@ cat /etc/yum.repos.d/cloudstack.repo
 #gpgkey=http://packages.shapeblue.com/release.asc
 ## Configure database
 printf "\n############### DATABASE CONFIG ################\n"
+rpm -ivh mysql-community-release-el7-5.noarch.rpm
 yum install mariadb mariadb-server -y -q
 grep  'binlog-format' /etc/my.cnf 2> /dev/null
 if [ $? == '1' ]; then 
 	sed "/mysql.sock/a innodb_rollback_on_timeout=1\ninnodb_lock_wait_timeout=600\nmax_connections=350\nlog-bin=mysql-bin\nbinlog-format = 'ROW'" /etc/my.cnf
 fi
-systemctl enable mariadb 2>/dev/null
-systemctl start mariadb 2>/dev/null
-systemctl status mariadb
+systemctl enable mysqld 2>/dev/null
+systemctl start mysqld 2>/dev/null
+systemctl status mysql
 ./mysql_secure $db_root_password
 
 ## Install Cloudstack
 printf "\n############### CLOUDSTACK CONFIG ################\n"
 yum install cloudstack-management -y -q
+alternatives --config java
 cloudstack-setup-databases cloud:$db_cloud_password@localhost --deploy-as=root:$db_root_password
 cloudstack-setup-management
+### xenserver post install commands
 wget http://download.cloudstack.org/tools/vhd-util -P $WORK_DIR
 yes | cp $WORK_DIR/vhd-util /usr/share/cloudstack-common/scripts/vm/hypervisor/xenserver/vhd-util
