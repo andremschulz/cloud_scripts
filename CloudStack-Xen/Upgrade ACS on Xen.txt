@@ -1,0 +1,61 @@
+Reporting in on this - turns out was fairly painless (I never ended up goofing around with host tags at all).
+
+
+
+Here's an updated to-do list (with some observations):
+
+
+
+  1.  In XenCenter – if HA is enabled for the XenServer pool, disable it
+  2.  Stop ACS management/usage services
+  3.  Do MySQL database backups
+  4.  Start ACS management/usage services
+  5.  Start with the pool master
+              *   In ACS – Put the pool master into maintenance mode (this migrate all guest VMs to other hosts in the cluster)
+              *   In ACS – Un-manage the cluster (this keeps any activity from happening in the pool)
+              *   NOW – Upgrade the XenServer pool master to the latest release
+
+                              i.      Do this by picking up the “correct” ISO from Citrix, burning it to a CD/DVD/USB-stick, booting the host with it & performing a manual upgrade to the version of XenServer you’re going to
+
+                            ii.      Before upgrading the installer should make a backup of the existing installation
+
+                           iii.      When the upgrade is complete you’ll be prompted to reboot the host
+
+                           iv.      OBSERVATION (after booting):
+
+                    *   The XenServer console (the ncurses interface) still said XenServer 6.5 in the upper-left-hand corner (which led me to believe that the upgrade hadn’t worked)
+                    *   However when I reconnected with XenCenter it reported XenServer 7.1 CU2 was installed
+                    *   So…OK, fine?
+                    *   There were no host tags for that newly upgraded host, so my to-do to remove the tag wasn’t necessary
+              *   In ACS – Re-manage the cluster
+              *   In ACS – Exit maintenance-mode for the newly upgraded host
+              *   In ACS – Observe that the newly upgraded host is “Enabled” and “Up” in the UI (Infrastructure > Hosts)
+              *   OBSERVATION:
+
+                              i.      After finishing the 2 steps above on checking in XenCenter the host now had the host tag: vmops-version-com.cloud.hypervisor.xenerver.resource.XenServer650Resource-4.11.3.0
+
+                            ii.      Scripts in /opt/cloud/bin have a timestamp that coincides with the cluster being re-managed and the pool master coming out of maintenance mode
+
+  1.  In ACS – Testing (e.g. move an existing router/VM to the upgraded host, create new networks/VMs on the upgraded host)
+
+                              i.      OBSERVATION:
+
+                    *   Moving existing router/VMs to the upgraded host worked
+                    *   I was not able to create new VMs until all pool members were at the same level of XenServer
+  1.  Rinse & repeat with the remaining XenServer pool members in the ACS cluster
+              *   Follow the same steps as the pool master EXCEPT do not un-manage/re-manage the cluster in ACS (no need to do so really although from the perspective of operators new VM creation is clearly not possible until were done and who knows maybe you don’t really want folks trying to take actions while you’re in the middle of all this?)
+              *   OBSERVATION (unexpected):
+
+                              i.      I noticed that even before I had brought a newly upgraded pool member out of maintenance in ACS that the following host tag vmops-version-com.cloud.hypervisor.xenerver.resource.XenServer650Resource-4.11.3.0 was already there
+
+                            ii.      AND that the Scripts in /opt/cloud/bin had a timestamp that coincides with the pool member’s recent reboot
+
+  1.  In XenCenter – if HA was enabled at the start, re-enable it
+
+
+
+So my lab pool is up and running upgraded from XenServer 6.5 to XenServer 7.1.2 CU2 LTSR and so far, CloudStack 4.11.3 seems to be happy with it.
+
+
+
+Next steps are to apply the latest XenServer hotfixes (following the same recipe above) and re-test activities in ACS.
