@@ -179,3 +179,7 @@ $stats | Group-Object -Property {$_.Timestamp.Day},{$_.Entity.Name} | %{
 }
 $allvms
 
+
+
+#########GET VM UUID
+Get-VM <VM-name> |%{(Get-View $_.Id).config.uuid}
