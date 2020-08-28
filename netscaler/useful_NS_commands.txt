@@ -1,0 +1,40 @@
+stat cs vserver PR_VS_SSL_JITSI
+  61 stat responder policy RS_POL_AUDIT_PROXY
+  62 stat cs vserver PR_VS_SSL_JITSI
+  63 stat responder policy RS_POL_AUDIT_PROXY
+  64 stat cs vserver PR_VS_SSL_JITSI
+  65 add cs vserver PR_VS_SSL_JITSI PROXY 212.73.156.60 * -cltTimeout 180 -Listenpolicy "CLIENT.TCP.DSTPORT.EQ(443)" -Listenpriority 1 -persistenceType NONE
+  66 add cs vserver PR_VS_SSL_JITSI PROXY 212.73.156.60 443 -cltTimeout 180 -Listenpolicy "CLIENT.TCP.DSTPORT.EQ(443)" -Listenpriority 1 -persistenceType NONE
+  67 save config
+  68 show run | grep 212.73.156.60
+  69 rm ns ip 212.73.156.60
+  70 save config
+  71 show ha node
+  72 show ns license
+  73 exit
+  74 shell
+  75 clear
+  76 shell
+  77 show rnat
+  78 stat rnat RNAT_ACL_OZ_PROD
+  79 stat rnat RNAT_ACL_OZ
+  80 stat rna
+  81 stat rnat
+  82 stat acl RNAT_ACL_OZ
+  83 stat pbr
+  84 show pbr
+  85 shell
+  86 show pbr
+  87 shell
+  88 show run | grep ns_jitsi_
+  89 set ssl vserver NS_LB_VS_JITSI_443_SSL -sslProfile ns_decrypt_ssl_profile_frontend
+  90 set ssl vserver CS_VS_212.73.156.60_SSL -sslProfile ns_decrypt_ssl_profile_frontend
+  91 show ssl profile ns_decrypt_ssl_profile_frontend
+  92 clear
+  93 shell
+  94 show vlan
+  95 set ssl vserver AAA_VIP_AUTH_JITSI -sslProfile ns_jitsi_ssl_profile_frontend
+  96 set ssl vserver NS_LB_VS_JITSI_443_SSL -sslProfile ns_jitsi_ssl_profile_frontend
+  97 set ssl vserver CS_VS_212.73.156.60_SSL -sslProfile ns_jitsi_ssl_profile_frontend
+  98 save config
+  99 stat lb vserver NS_LB_VS_JITSI_PORTS_UDP
