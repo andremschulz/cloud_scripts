@@ -26,10 +26,11 @@
 #xe vdi-export uuid=030adbcb-9491-4a1d-8c1a-39fd2ea7bf1f filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/passify_snap
 #xe vdi-export uuid=d3b449c7-a5b6-4104-93ff-bfffd25f5421 filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/jenkins-sh.cy.corp.int
 
-echo "jenkins.cy.corp.int_0"
-xe vdi-export uuid=9f0a0a2a-a392-4121-9d9d-2e79064ae3d9 filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/jenkins.cy.corp.int_0_snap
-echo "jenkins.cy.corp.int_0"
-xe vdi-export uuid=244edf8b-f357-4725-bfd3-1dc21956bb73 filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/jenkins.cy.corp.int_1_snap
+#echo "jenkins.cy.corp.int_0"
+#xe vdi-export uuid=9f0a0a2a-a392-4121-9d9d-2e79064ae3d9 filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/jenkins.cy.corp.int_0_snap
+#xe vdi-export uuid=244edf8b-f357-4725-bfd3-1dc21956bb73 filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/jenkins.cy.corp.int_1_snap
+
+xe vdi-export uuid=f0e29bf4-e49a-4283-a0f7-f89b3f00efef filename=/var/run/sr-mount/fdbade06-7f71-9179-8e90-06ce6bc8c692/voip-cy.corp.int_snap
 
 
 
