@@ -24,8 +24,6 @@ if($tag -eq "")
 	$title = $v + " - " + $tag
 }
 
-write-host "$title"
-
 function header{
  $style = @"
  <style>
