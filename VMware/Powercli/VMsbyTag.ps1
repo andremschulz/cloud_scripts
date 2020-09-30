@@ -1,17 +1,30 @@
 [CmdletBinding()]
 Param(
- [Parameter(Mandatory=$false,Position=1)]
- [string]$hostFQDN,
- [Parameter(Mandatory=$false,Position=2)]
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [string]$v, ##vcenter FQDN
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [string]$u, ##username
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [string]$p, ##password
+ [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
  [string]$tag,
- [Parameter(Mandatory=$false,Position=3)]
- [string]$user,
- [Parameter(Mandatory=$false,Position=4)]
- [string]$pass,
- [Parameter(Mandatory=$false,Position=5)]
- [string]$sortBy
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [string]$output,
+ [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+ [string]$sortBy,
+ [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+ [string]$colour='#e6f2ff'
 )
 
+if($tag -eq "")
+{
+	$title = $v + " - " + "no tag"
+} else
+{
+	$title = $v + " - " + $tag
+}
+
+write-host "$title"
 
 function header{
  $style = @"
@@ -55,7 +68,7 @@ function header{
   float: left;
  }
  
- table tr:nth-child(even){background: #e6f2ff;} 
+ table tr:nth-child(even){background: $colour;} 
  table tr:nth-child(odd) {background: #FFFFFF;}
 
  div.column {width: 320px; float: left;}
@@ -105,12 +118,14 @@ function VMsbyTag($tag){
 		$list = foreach($vm in $vms)
 		{
 			$vmtag = Get-TagAssignment -Entity $vm
-			if($vmtag -eq $null) { varsAll }
+			#if($vmtag -eq $null) { varsAll }
+			if($vmtag -eq $null) { varsBackup }
 		}
 	} else
 	{
 		$vms = Get-VM -Tag $tag
-		$list = foreach($vm in $vms) { varsAll }
+		#$list = foreach($vm in $vms) { varsAll }
+		$list = foreach($vm in $vms) { varsBackup }
 	}
 		
 	return $list
@@ -126,10 +141,29 @@ function varsAll {
 		"Memory" = $vm.MemoryGB
 		"NICS" = $vm.ExtensionData.Summary.Config.NumEthernetCards
 		"IPs" = $vm.Guest.IPAddress -join '|'
-		"UUID" = $vm.ExtensionData.Config.Uuid
+		"UUID" = $vm.ExtensionData.Config.Uuidk
 		"Host" = $vm.VMHost.Name
 		"Notes" = $vm.Notes
-		"Version" = $vm.ExtensionData.Config.HardwareVersion
+		"Version" = $vm.ExtensionData.Config.Version
 		"attached ISO" = ($vm |Get-CDDrive).IsoPath
 	}
 }
+
+function varsBackup {
+	[PSCustomObject]@{
+		"Name" = $vm.Name
+		"Host" = $vm.VMHost.Name
+		"Version" = $vm.ExtensionData.Config.Version
+		"OS" = $vm.ExtensionData.Config.GuestFullName
+		"attached ISO" = ($vm |Get-CDDrive).IsoPath
+	}
+}
+
+
+#$ips=$vm.guest.net.ipaddress
+#if ($ips.count -gt 1) {$ips=$vm.guest.net.ipaddress[0] + " " + $vm.guest.net.ipaddress[1]}
+
+
+login $v $u $p
+VMsbyTag |Sort-Object -Property Name| ConvertTo-Html -Head $(header) -PreContent $title | Add-Content c:\TEMP\$output
+
