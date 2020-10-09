@@ -134,11 +134,12 @@ send_mail (){                           #send mail function
 		local description2="$4";
 		local description2_var=("${!5}");
 		local host=$(hostname);
+		local pool=$(xe pool-list params=name-label | awk '{print $5}');
 
 ssmtp "$mail_group"<<END_MAIL
 To: $mail_group;
-From: xen@tracksystem.info;
-Subject: $host $subject;
+From: xen@office.corp;
+Subject: $pool - $subject;
 
 ${description1[@]}  ${description1_var[@]}
 asd
@@ -234,3 +235,5 @@ logger -p news.info "Launching backup collection.....;"
 #               logger -p news.info "Success";
 #fi
 logger -p news.info "# # # # # # # # # # # # Script finished! # # # # # # # # # # # #";
+
+
