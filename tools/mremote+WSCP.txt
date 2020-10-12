@@ -1,0 +1,5 @@
+on Mremote:
+1. Tools -> external tools
+2. Browse WINSCP
+3. in arguments add sftp://%Username%:%!Password%@%Hostname%
+5.Enjoy!
