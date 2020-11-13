@@ -88,17 +88,17 @@ function logout($vCenter) {
 
 Function email {
     Param (
-        [Parameter(Mandatory=$true)]
-        [String]$EmailTo,
+        [Parameter(Mandatory=$false)]
+        [String]$EmailTo=([adsisearcher]"(samaccountname=$env:USERNAME)").FindOne().Properties.mail,  #This gives a default value to the $EmailFrom command,
         [Parameter(Mandatory=$true)]
         [String]$Subject,
         [Parameter(Mandatory=$true)]
         [String]$Body,
         [Parameter(Mandatory=$false)]
-        [String]$EmailFrom=([adsisearcher]"(samaccountname=$env:USERNAME)").FindOne().Properties.mail,  #This gives a default value to the $EmailFrom command
+        [String]$EmailFrom=$env:computername + "@office.corp",
         [Parameter(mandatory=$false)]
         [Array]$attachment,
-        [Parameter(mandatory=$false)]
+        [Parameter(mandatory=$false)]   
         [String]$Password
     )
 		write-Host "are we here? - "$attachment.count
@@ -106,7 +106,6 @@ Function email {
         $SMTPServer = "sr-fr-smtp.office.corp" 
         $SMTPMessage = New-Object System.Net.Mail.MailMessage($EmailFrom,$EmailTo,$Subject,$Body)
         if ($attachment.count -gt 0) {
-			write-Host "is array - $attachment"
 			foreach($a in $attachment) {
 				$SMTPattachment = New-Object System.Net.Mail.Attachment($a)
 				$SMTPMessage.Attachments.Add($SMTPattachment)
