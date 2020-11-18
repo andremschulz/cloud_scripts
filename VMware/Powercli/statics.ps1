@@ -57,27 +57,32 @@ function header{
  return [string] $style
  }
 
-function login($vCenter, $user, $password) {
-	connect-viserver $vCenter -user $user -password $password -ErrorAction SilentlyContinue
+function login($vCenter, $user, $pass) {
+
+	if($pass -eq "") { 
+		loginWithCredential $vCenter $user
+	}
+	else {
+		$connection = connect-viserver $vCenter -user $user -password $pass -ErrorAction SilentlyContinue
+	}
+	
 	$serverlist = $global:DefaultVIServer
 	if($serverlist -eq $null) 
 	{
 	   write-host "No connected servers."
 	   BREAK
-	} else 
-	{
+	} else {
 		foreach ($server in $serverlist) 
 		{
 			$serverName = $server.Name
 			if($serverName -eq $vCenter)
 			{
-				write-Host "Connection to $vCenter established!"
-			} else 
-			{
-				write-host "Error: Unable to connect"
-				BREAK
+				write-Host "==> Connection to $vCenter established!"
+				return 0
 			}
 		}
+		write-host "==> Error: Unable to connect"
+		return 1
 	}
 }
 
@@ -101,7 +106,6 @@ Function email {
         [Parameter(mandatory=$false)]   
         [String]$Password
     )
-		write-Host "are we here? - "$attachment.count
 
         $SMTPServer = "sr-fr-smtp.office.corp" 
         $SMTPMessage = New-Object System.Net.Mail.MailMessage($EmailFrom,$EmailTo,$Subject,$Body)
@@ -117,4 +121,60 @@ Function email {
         $SMTPClient.Send($SMTPMessage)
         Remove-Variable -Name SMTPClient
         Remove-Variable -Name Password
+}
+
+function eol {
+	[CmdletBinding()]
+	Param(
+	  [Parameter(Mandatory=$True,Position=1)][ValidateSet("mac","unix","win")] [string]$lineEnding,
+	  [Parameter(Mandatory=$True)][string]$file
+	)
+
+	# Convert the friendly name into a PowerShell EOL character
+	Switch ($lineEnding) {
+	  "mac"  { $eol="`r" }
+	  "unix" { $eol="`n" }
+	  "win"  { $eol="`r`n" }
+	} 
+
+	# Replace CR+LF with LF
+	$text = [IO.File]::ReadAllText($file) -replace "`r`n", "`n"
+	[IO.File]::WriteAllText($file, $text)
+
+	# Replace CR with LF
+	$text = [IO.File]::ReadAllText($file) -replace "`r", "`n"
+	[IO.File]::WriteAllText($file, $text)
+
+	#  At this point all line-endings should be LF.
+
+	# Replace LF with intended EOL char
+	if ($eol -ne "`n") {
+	  $text = [IO.File]::ReadAllText($file) -replace "`n", $eol
+	  [IO.File]::WriteAllText($file, $text)
+	}
+}
+
+function createCredential($user) {
+# create usage example - createCredentials -user 'vmware.service'
+	$Key = [byte]1..16
+	$path = "C:\scripts\vmware\credentials"
+	$credential = Get-Credential -username $user -Message "supply password"
+	$credential | Export-CliXml -Path "$path\$user.xml"
+
+}
+
+function loginWithCredential($vc, $user) {
+
+	$path = "C:\scripts\vmware\credentials\" + $user + ".xml"
+	$credential = Import-CliXml -Path $path
+	$conn = Connect-VIServer $vc -credential $credential -ErrorAction SilentlyContinue
+
+#$Key = [byte]1..16
+#$encrypted = Get-Content "$path`\$user.key" | ConvertTo-SecureString -Key $Key
+#$encrypted = Get-Content "C:\scripts\vmware\credentials\vmware.serivce@office.corp.key" | ConvertTo-SecureString -Key $Key
+#$credential = New-Object System.Management.Automation.PsCredential -ArgumentList ($user, $encrypted)
+#$credential = Import-CliXml -Path "$path\$user.xml"
+#$credential = Import-CliXml -Path "C:\scripts\vmware\credentials\vmware.service@office.corp.xml"
+#Connect-VIServer "dedc-bk-vci1.office.corp" -credential $credential -ErrorAction SilentlyContinue
+
 }
