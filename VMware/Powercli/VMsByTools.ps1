@@ -36,8 +36,8 @@ function vmByTools() {
 	return $list
 }
 
-$out = login $v $u $p
-echo "out is $out"
-
-vmByTools |Sort-Object -Property "update?"| ConvertTo-Html -Head $(header)  -PreContent "$title - VMs by VMtools version" | Out-File -FilePath $output
-logout($v)
+$log = login $v $u $p
+if( $log -eq 0) { 
+	vmByTools |Sort-Object -Property "update?"| ConvertTo-Html -Head $(header)  -PreContent "$title - VMs by VMtools version" | Out-File -FilePath $output
+	logout($v)
+}

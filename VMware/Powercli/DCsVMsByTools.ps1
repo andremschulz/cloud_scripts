@@ -24,13 +24,13 @@ Param(
 $reports = @()
  ForEach ($v in $vCenters)
  {
-	$output = "C:\scripts\output\" + $v + "_vmsbytools.html"
+	$output = "C:\scripts\output\$v`VMsByTools"  + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
 	echo  "==> Logging on $v..."
 	if($p -eq "") {
-		.\vmsByTools.ps1 -v $v -u $u       -output "$output"
+		.\VMsByTools.ps1 -v $v -u $u       -output "$output"
 	}
 	else {
-		.\vmsByTools.ps1 -v $v -u $u -p $p -output "$output"
+		.\VMsByTools.ps1 -v $v -u $u -p $p -output "$output"
 	}
 	eol -lineEnding unix -file $output
 	$reports += $output
