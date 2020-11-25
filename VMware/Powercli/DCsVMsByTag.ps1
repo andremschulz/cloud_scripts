@@ -1,57 +1,67 @@
 ### Backup team report
+[CmdletBinding()]
+Param(
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [string]$u, 		
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [Security.SecureString]$p,
+ [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [string]$ct,
+  [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+ [string]$em=""
+ )
+ 
+ Set-Location -Path C:\scripts\vmware
 
 . ".\code\statics.ps1"
+
 $vCenters =
-"ilhq-bk-vci1.office.corp"
-#"dedc-bk-vci1.office.corp",
-#"dedc-bk-vcd1.office.corp",
-#"bghq-bk-vci01.office.corp",
-#"bgdc-bk-vci1.office.corp"
- 
- $tags =
- "high",
- "medium",
- "low"
- 
- 
- $colours = @{
- "high"	   = '#FFEFE6';
- "medium"  = '#FFFBE1';
- "low"     = '#EDFFE2';
- "notag"   = '#E8F5FF';
- "cutag"   = '#FCD2FF'
-}
+"ilhq-bk-vci1.office.corp",
+"dedc-bk-vci1.office.corp",
+"dedc-bk-vcd1.office.corp",
+"bghq-bk-vci01.office.corp",
+"bgdc-bk-vci1.office.corp"
 
-$user = ''
-$pass = ''
-
- #$reportList = []
- 
+$colours = '#FFEFE6', '#FFFBE1', '#EDFFE2', '#E8F5FF', '#FCD2FF', '#D2FFFC', '#FFD2FA'
+$reportList = @()
  ForEach ($v in $vCenters)
  {
+	$tags = ""
+	if( (login $v $u $p) -eq 0) { 
+		$tags = tagsByCategory $v $ct
+		$tags+="notag"
+		write-host "==> Tags are $ct`: $tags"
+		logout($v)
+	}
+	
 	$report = ""
+	$tagCount = 0
 	$output = "C:\scripts\output\$v`_VMsByTag_" + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
 	forEach($t in $tags)
 	{
-		echo "==> $v - $t with colour: $colours[`"$t`"]"
-		$frag = . ".\VMsByTag.ps1" -v $v -u $user -p $pass -tag $t -colour $colours["$t"]
-		$report = $report + $frag
+		$clr = $tagCount % $colours.Count
+		echo ("==> $v - $t")
+		if($p -eq "") {
+			$fragment = . ".\VMsByTag.ps1" -v $v -u $u       -tag $t -category $ct -colour $colours[$clr] -klas "$tagCount"
+			
+		}
+		else {
+			$fragment = . ".\VMsByTag.ps1" -v $v -u $u -p $p -tag $t -category $ct -colour $colours[$clr] -klas "$tagCount"
+		}
+		
+		$report += $fragment
+		$tagCount+=1
 	}
 	
-	ConvertTo-HTML -head "$v - VMs by TAG" -PostContent "$report" | Out-File -FilePath "$output"
-	
-	## No tags
-	#report.ps1 -v $v -u $user -p $pass			     -colour $colours["notag"]   -output $output
-	
-	#$reportList = $reportList + $output
+	ConvertTo-HTML -head "VMs by TAG" -PostContent "$report" | Out-File -FilePath "$output"
+	$reportList = $reportList + $output
  }
+ 
+ 
+ if($em -eq "") { email -Body "VMs by backup tag for each vcenter in Black environment" -Subject "Global Black: VMs by Backup tag" -attachment $reportList }
+ else { email -emailTo $em -Body "VMs by backup tag for each vcenter in Black environment" -Subject "Global Black: VMs by Backup tag" -attachment $reportList }
 
-	
-	#ConvertTo-HTML -head "DEDC-BK-VCI01 BACKUP REPORT" -PostContent "$frag_high,$frag_medium,$frag_low,$frag_no" |Add-Content c:\TEMP\reporting1.html
-		
-	
-	
-		
-	#$v = "ILHQ-BK-VCI1"
-	#$v = "DEDC-BK-VCI01"
-	#$output = $v + "_" + (get-date -Format s) + '.html'
+
+##testing
+#	login ilhq-bk-vci1.office.corp vmware.service@office.corp ""
+#	$fragment = . ".\VMsByTag.ps1" -v ilhq-bk-vci1.office.corp -u vmware.service@office.corp -tag notag -colour '#FFEFE6' -klas "1"

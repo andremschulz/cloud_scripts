@@ -1,0 +1,1 @@
+runas /u:dc\user "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -ExecutionPolicy Bypass -File C:\scripts\vmware\DCsVMsByTag.ps1 -u vmware.service@dc.dc -category Veeam Backup"

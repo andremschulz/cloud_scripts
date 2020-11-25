@@ -4,7 +4,9 @@ Param(
  [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
  [string]$u, 		
  [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
- [string]$p=""
+ [string]$p="",
+ [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+ [string]$email=""
  )
  
 
@@ -38,6 +40,7 @@ $reports = @()
  }
  
 #email -EmailTo "backup.team@NSOGROUP.COM" -Body "VMs by VMware tools for each vcenter in Black environment" -Subject "Global Black: VMs by tools" -attachment $reports
+
 email -Body "VMs by VMware tools for each vcenter in Black environment" -Subject "Global Black: VMs by tools" -attachment $reports
 
 	

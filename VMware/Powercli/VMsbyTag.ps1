@@ -4,10 +4,12 @@ Param(
  [string]$v, 		## vcenter FQDN
  [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
  [string]$u,		## username
- [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+ [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
  [string]$p="", 		## password
  [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
- [string]$tag, 		## filter got get VMs by
+ [string]$tag="notag", 		## filter got get VMs by
+ [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+ [string]$category="", 		## filter got get VMs by
  [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
  [string]$sortBy,   ## sort output
  [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
@@ -20,28 +22,31 @@ Param(
 
 . ".\code\statics.ps1"
 
-##$title = $v + " - " + "high"
-##write-host "$title"
-
 function VMsbyTag($tag){
 	
-	if($tag -eq $nul)
-	{
+	$returnVars = @{}
+	$flag = 0
+	if($tag -eq "notag") {
 		$vms = Get-VM
-		$list = foreach($vm in $vms)
-		{
-			$vmtag = Get-TagAssignment -Entity $vm
-			#if($vmtag -eq $null) { varsAll }
-			if($vmtag -eq $null) { varsBackup }
+		foreach($c in (Get-Tag).Category.Name) {
+			if($c -eq $category) {
+				$list = foreach($vm in $vms) {
+					$vmtag = Get-TagAssignment -Entity $vm -Category $category
+					if($vmtag -eq $null) { varsBackup }
+				}
+				$flag = 0
+				break
+			}
+			$flag = 1
 		}
-	} else
-	{
+	} 
+	else {
 		$vms = Get-VM -Tag $tag
-		#$list = foreach($vm in $vms) { varsAll }
 		$list = foreach($vm in $vms) { varsBackup }
-	}
-		
-	return $list
+	}	
+	$returnVars.Add("content", $list)
+	$returnVars.Add("error", $flag)
+	return $returnVars
 }
 
 function varsAll {
@@ -60,6 +65,9 @@ function varsAll {
 		"Version" = $vm.ExtensionData.Config.Version
 		"attached ISO" = ($vm |Get-CDDrive).IsoPath
 	}
+	
+	#$ips=$vm.guest.net.ipaddress
+	#if ($ips.count -gt 1) {$ips=$vm.guest.net.ipaddress[0] + " " + $vm.guest.net.ipaddress[1]}
 }
 
 function varsBackup {
@@ -74,15 +82,14 @@ function varsBackup {
 	}
 }
 
-#$ips=$vm.guest.net.ipaddress
-#if ($ips.count -gt 1) {$ips=$vm.guest.net.ipaddress[0] + " " + $vm.guest.net.ipaddress[1]}
-
 $log = login $v $u $p
 if( $log -eq 0) { 
-	$frag = VMsbyTag |Sort-Object -Property Name| ConvertTo-Html -Head $(header($klas)) 
-	$frag = $frag -replace '<table>',"<table class=`"$klas`">"
-	#$frag = VMsbyTag |Sort-Object -Property Name| ConvertTo-Html -Head $(header_backup) -PreContent $title
-	#$frag = $frag -replace '<table>',"<table class=`"$klas`">" | Add-Content c:\TEMP\$output
+	$vars = VMsbyTag($tag)
+	if($vars["error"] -eq 1) { $title = "Category `"$category`" does not exist in $v" }
+	$content = $vars["content"] |Sort-Object -Property Name| ConvertTo-Html -Head $(header($klas)) -PreContent $title
+	$content = $content -replace '<table>',"<table class=`"t$klas`">"
+	#$content = VMsbyTag |Sort-Object -Property Name| ConvertTo-Html -Head $(header_backup) -PreContent $title
+	#$content = $content -replace '<table>',"<table class=`"$klas`">" | Add-Content c:\TEMP\$output
 	logout($v)
-	return $frag
+	return $content
 }

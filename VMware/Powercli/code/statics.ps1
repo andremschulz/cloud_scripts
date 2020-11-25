@@ -1,3 +1,5 @@
+
+
 function header($klas){
  $style = @"
  <style>
@@ -5,7 +7,7 @@ function header($klas){
  font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
  }
  
- table.$klas{
+ table.t$klas{
   border-collapse: collapse;
   border: none;
   font: 10pt Verdana, Geneva, Arial, Helvetica, sans-serif;
@@ -13,14 +15,14 @@ function header($klas){
   margin-bottom: 10px;
  }
  
- table.$klas td{
+ table.t$klas td{
   font-size: 12px;
   padding-left: 0px;
   padding-right: 20px;
   text-align: left;
  }
  
- table.$klas th{
+ table.t$klas th{
   font-size: 12px;
   font-weight: bold;
   padding-left: 0px;
@@ -36,18 +38,18 @@ function header($klas){
   margin-left: 10px; font-size: 12px;
  }
  
- table.$klas.list{
+ table.t$klas.list{
   float: left;
  }
  
- table.$klas tr:nth-child(even){background: $colour;} 
- table.$klas tr:nth-child(odd) {background: #FFFFFF;}
+ table.t$klas tr:nth-child(even){background: $colour;} 
+ table.t$klas tr:nth-child(odd) {background: #FFFFFF;}
 
  div.column {width: 320px; float: left;}
  div.first {padding-right: 20px; border-right: 1px grey solid;}
  div.second {margin-left: 30px;}
 
- table.$klas{
+ table.t$klas{
   margin-left: 10px;
  }
  –>
@@ -159,16 +161,15 @@ function createCredential($user) {
 	$Key = [byte]1..16
 	$path = "C:\scripts\vmware\credentials"
 	$credential = Get-Credential -username $user -Message "supply password"
-	$credential | Export-CliXml -Path "$path\$user.xml"
+	$credential | Export-CliXml -Path "$path\${user}_${env:USERNAME}_${env:COMPUTERNAME}.xml"
 
 }
 
 function loginWithCredential($vc, $user) {
-
-	$path = "C:\scripts\vmware\credentials\" + $user + ".xml"
-	$credential = Import-CliXml -Path $path
+	$path = "C:\scripts\vmware\credentials"
+	$credential = Import-CliXml -Path "$path\${user}_${env:USERNAME}_${env:COMPUTERNAME}.xml"
 	$conn = Connect-VIServer $vc -credential $credential -ErrorAction SilentlyContinue
-
+	
 #$Key = [byte]1..16
 #$encrypted = Get-Content "$path`\$user.key" | ConvertTo-SecureString -Key $Key
 #$encrypted = Get-Content "C:\scripts\vmware\credentials\vmware.serivce@office.corp.key" | ConvertTo-SecureString -Key $Key
@@ -177,4 +178,13 @@ function loginWithCredential($vc, $user) {
 #$credential = Import-CliXml -Path "C:\scripts\vmware\credentials\vmware.service@office.corp.xml"
 #Connect-VIServer "dedc-bk-vci1.office.corp" -credential $credential -ErrorAction SilentlyContinue
 
+}
+
+function tagsByCategory($v, $category){
+	foreach($c in (Get-Tag).Category.Name) {
+		if($c -eq $category) {
+			$tags = (Get-Tag -Category $category -Server $v).name
+			return $tags
+		}
+	}
 }
