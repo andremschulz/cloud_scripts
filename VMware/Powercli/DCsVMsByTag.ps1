@@ -2,11 +2,11 @@
 [CmdletBinding()]
 Param(
  [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
- [string]$u, 		
+ [string]$u, 						# username to login on vcenter and get the data
  [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
- [Security.SecureString]$p,
+ [string]$p,         				# password
  [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
- [string]$ct,
+ [string]$ct,		                # category by which to get all the tags
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
  [string]$em=""
  )
@@ -27,16 +27,17 @@ $reportList = @()
  ForEach ($v in $vCenters)
  {
 	$tags = ""
+	$report = ""
+	$tagCount = 0
+	$output = "D:\vmware-output\$v`_VMsByTag_" + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
+	
 	if( (login $v $u $p) -eq 0) { 
 		$tags = tagsByCategory $v $ct
 		$tags+="notag"
 		write-host "==> Tags are $ct`: $tags"
 		logout($v)
 	}
-	
-	$report = ""
-	$tagCount = 0
-	$output = "C:\scripts\output\$v`_VMsByTag_" + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
+
 	forEach($t in $tags)
 	{
 		$clr = $tagCount % $colours.Count

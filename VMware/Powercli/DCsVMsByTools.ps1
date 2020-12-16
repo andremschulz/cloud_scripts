@@ -26,7 +26,7 @@ Param(
 $reports = @()
  ForEach ($v in $vCenters)
  {
-	$output = "C:\scripts\output\$v`VMsByTools"  + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
+	$output = "C:\scripts\vmware-output\$v`VMsByTools"  + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
 	echo  "==> Logging on $v..."
 	if($p -eq "") {
 		.\VMsByTools.ps1 -v $v -u $u       -output "$output"

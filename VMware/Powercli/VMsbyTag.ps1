@@ -22,30 +22,31 @@ Param(
 
 . ".\code\statics.ps1"
 
-function VMsbyTag($tag){
+function VMsbyTag($v, $tag){
 	
 	$returnVars = @{}
-	$flag = 0
 	if($tag -eq "notag") {
-		$vms = Get-VM
-		foreach($c in (Get-Tag).Category.Name) {
-			if($c -eq $category) {
-				$list = foreach($vm in $vms) {
-					$vmtag = Get-TagAssignment -Entity $vm -Category $category
-					if($vmtag -eq $null) { varsBackup }
+		$vms = Get-VM -Location (Get-Datacenter -Server $v).Name
+		$list = foreach($vm in $vms) {
+			$flag = 0
+			$vmtag = (Get-TagAssignment -Entity $vm).tag.Category.Name
+			foreach($i in (Get-TagAssignment -Entity $vm).tag.Category.Name) {
+				if($i -eq $category) {
+					#write-host "category $i - $vm"
+					$flag = 1
+					break						
 				}
-				$flag = 0
-				break
 			}
-			$flag = 1
+			if( $flag -eq 0) { varsBackup }
 		}
-	} 
+	}
 	else {
-		$vms = Get-VM -Tag $tag
+		$vms = Get-VM -Tag $tag -Location (Get-Datacenter -Server $v).Name
 		$list = foreach($vm in $vms) { varsBackup }
-	}	
+	}
+	
 	$returnVars.Add("content", $list)
-	$returnVars.Add("error", $flag)
+	#$returnVars.Add("error", $flag)
 	return $returnVars
 }
 
@@ -75,7 +76,9 @@ function varsBackup {
 	if (($vm |Get-CDDrive).IsoPath)	{ $iso = "yes" } else { $iso = "" }
 	[PSCustomObject]@{
 		"Name" = $vm.Name
+		"State" = $vm.PowerState
 		"Host" = $vm.VMHost.Name
+		"Total size(GB)" = [System.Math]::Round($vm.UsedSpaceGB)
 		"Version" = $vm.ExtensionData.Config.Version
 		"OS" = $vm.ExtensionData.Config.GuestFullName
 		"ISO?" = $iso
@@ -84,9 +87,9 @@ function varsBackup {
 
 $log = login $v $u $p
 if( $log -eq 0) { 
-	$vars = VMsbyTag($tag)
-	if($vars["error"] -eq 1) { $title = "Category `"$category`" does not exist in $v" }
-	$content = $vars["content"] |Sort-Object -Property Name| ConvertTo-Html -Head $(header($klas)) -PreContent $title
+	$vars = VMsbyTag $v $tag
+	if($tag -eq "notag") { $title = "$v - VMs with no tag in category `"$category`" (even if they have other tags)" }
+	$content = $vars["content"] |Sort-Object -Property Name| ConvertTo-Html -Head $( header($klas)) -PreContent $title
 	$content = $content -replace '<table>',"<table class=`"t$klas`">"
 	#$content = VMsbyTag |Sort-Object -Property Name| ConvertTo-Html -Head $(header_backup) -PreContent $title
 	#$content = $content -replace '<table>',"<table class=`"$klas`">" | Add-Content c:\TEMP\$output

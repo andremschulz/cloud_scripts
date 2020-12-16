@@ -1,5 +1,4 @@
 
-
 function header($klas){
  $style = @"
  <style>
@@ -181,7 +180,7 @@ function loginWithCredential($vc, $user) {
 }
 
 function tagsByCategory($v, $category){
-	foreach($c in (Get-Tag).Category.Name) {
+	foreach($c in (Get-Tag -Server $v).Category.Name) {
 		if($c -eq $category) {
 			$tags = (Get-Tag -Category $category -Server $v).name
 			return $tags
