@@ -16,11 +16,11 @@ Param(
 . ".\code\statics.ps1"
 
 $vCenters =
-"ilhq-bk-vci1.office.corp",
-"dedc-bk-vci1.office.corp",
-"dedc-bk-vcd1.office.corp",
-"bghq-bk-vci01.office.corp",
-"bgdc-bk-vci1.office.corp"
+"xx",
+"xx",
+"xx",
+"xx",
+"xx"
 
 $colours = '#FFEFE6', '#FFFBE1', '#EDFFE2', '#E8F5FF', '#FCD2FF', '#D2FFFC', '#FFD2FA'
 $reportList = @()
