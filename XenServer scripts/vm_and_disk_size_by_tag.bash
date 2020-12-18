@@ -123,11 +123,12 @@ do
 
 ### get VM name
 	VMNAME="$(xe vm-list uuid=$UUID params=name-label |cut "-c23-");"
+	
 	### skip non VM nodes
 	VMnames["$UUID"]="$VMNAME";
 	skipVM "$VMNAME" "$UUID"
 	if [ "$?" == "1" ]; then continue; fi
-	#echo "======= $VMNAME with $UUID ======="
+	
 ### get disk total size
 	VMVBDS=($(xe vm-disk-list uuid=$UUID| grep "VDI:" -A 1 |grep uuid |cut "-c26-"))
 	VMSIZE=0;
@@ -137,10 +138,11 @@ do
 		VMSIZE=$(($VMSIZE+$disk_size));
 	done
 	VMsizes["$UUID"]=$((VMSIZE / 1073741824));
-	#echo "size $VMSIZE"
+	
 ### Get power state
 	VMstates["$UUID"]="$(xe vm-list uuid=$UUID params=power-state  |cut "-c24-")";
 	#echo "state ${VMstates[$UUID]}"
+	
 ### Populate tag arrays (for future filter use)
 	IFS=', ' read -r -a VMTAG <<< "$(xe vm-list uuid=$UUID params=tags  | cut "-c17-")";
 	VMtags["$UUID"]="${VMTAG[@]}";
@@ -175,8 +177,4 @@ htmlReport "/tmp/test.html" 1
 for idx in "${!TagIndex[@]}";
 do
 	echo "$idx - ${TagVMCount[$idx]}";
-	#for (( c=0; c<${TagVMCount["$idx"]}; c++ ));
-	#do
-		
-	#done
 done
