@@ -1,7 +1,10 @@
 #!/bin/bash
 
-###### CONFIGURE FIREWALLD #######
+###### REQUIRED VARIABLES #######
+NFSSR="/var/cloud_isos" 		# directory for NFS storage
 
+###### CONFIGURE FIREWALLD #######
+printf "\n############### CONFIGURE FIREWALL ################\n"
 yum -y -q install firewalld
 systemctl start firewalld.service
 systemctl enable firewalld.service
@@ -12,28 +15,26 @@ firewall-cmd --permanent --add-service=rpc-bind
 firewall-cmd --reload
 
 ##### CONFIGURE NFS #########
+printf "\n############### CONFIGURE NFS ################\n"
 yum install nfs-utils -y -q
 systemctl enable nfs-server.service
 systemctl start nfs-server.service
 
-add to /etc/sysconfig/nfs
+sed -i 's/#LOCKD_TCPPORT=32803/LOCKD_TCPPORT=32803/' 				/etc/sysconfig/nfs
+sed -i 's/#LOCKD_UDPPORT=32769/LOCKD_UDPPORT=32769/' 				/etc/sysconfig/nfs
+sed -i 's/#MOUNTD_PORT=892/MOUNTD_PORT=892/' 		  				/etc/sysconfig/nfs
+sed -i 's/#RQUOTAD_PORT=875/RQUOTAD_PORT=875/'       				/etc/sysconfig/nfs
+sed -i 's/#STATD_PORT=662/STATD_PORT=662/'           				/etc/sysconfig/nfs
+sed -i 's/#STATD_OUTGOING_PORT=2020/STATD_OUTGOING_PORT=2020/' 		/etc/sysconfig/nfs
 
-LOCKD_TCPPORT=32803
-LOCKD_UDPPORT=32769
-MOUNTD_PORT=892
-RQUOTAD_PORT=875
-STATD_PORT=662
-STATD_OUTGOING_PORT=2020
+if [ ! -d $NFSSR ]; then
+	mkdir $NFSSR
+fi
+chmod -R 755 $NFSSR
+chown nfsnobody:nfsnobody $NFSSR
 
-
-#mkdir /var/cloud_isos
-chmod -R 755 /var/cloud_isos
-chown nfsnobody:nfsnobody /var/cloud_isos
-
-
-printf "/var/cloud_isos         *(rw,no_root_squash,no_subtree_check)">>/etc/exports
+printf "$NFSSR         *(rw,no_root_squash,no_subtree_check)" >     /etc/exports
 exportfs -a
+##### NFS STATUS #########
+systemctl status nfs.service
 
-
-
-lvcreate -n cloud_isos --size 100G cloud_nfs
