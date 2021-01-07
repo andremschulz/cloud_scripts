@@ -1,9 +1,29 @@
+function header($heading) {
+$header = @"
+<head><style>
+.header {
+  padding: 10px;
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+  font-size: 15px;
+}
+ 
+</style> </head>
 
-function header($klas){
+<div class="header">
+  <h1>$heading</h1>
+</div>
+"@
+}
+
+function body($klas){
  $style = @"
  <style>
  body{
  font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+ text-align: center;
+ font-size: 22px;
  }
  
  table.t$klas{
@@ -49,7 +69,8 @@ function header($klas){
  div.second {margin-left: 30px;}
 
  table.t$klas{
-  margin-left: 10px;
+  margin-left: auto;
+  margin-right: auto;
  }
  –>
  </style>
@@ -59,9 +80,12 @@ function header($klas){
  }
 
 function login($vCenter, $user, $pass) {
-
-	if($pass -eq "") { 
-		loginWithCredential $vCenter $user
+	
+	Write-host $pass
+	if($user -eq "") { 
+		$credentials = Get-VICredentialStoreItem -Host $vCenter -File C:\scripts\vmware\credentials\vmwareAuth.txt
+		Write-host "yes"
+		$connection = connect-viserver $vCenter -User $credentials.User -Password $credentials.Password -ErrorAction SilentlyContinue
 	}
 	else {
 		$connection = connect-viserver $vCenter -user $user -password $pass -ErrorAction SilentlyContinue
@@ -155,28 +179,10 @@ function eol {
 	}
 }
 
-function createCredential($user) {
-# create usage example - createCredentials -user 'vmware.service'
-	$Key = [byte]1..16
-	$path = "C:\scripts\vmware\credentials"
-	$credential = Get-Credential -username $user -Message "supply password"
-	$credential | Export-CliXml -Path "$path\${user}_${env:USERNAME}_${env:COMPUTERNAME}.xml"
-
-}
-
-function loginWithCredential($vc, $user) {
-	$path = "C:\scripts\vmware\credentials"
-	$credential = Import-CliXml -Path "$path\${user}_${env:USERNAME}_${env:COMPUTERNAME}.xml"
-	$conn = Connect-VIServer $vc -credential $credential -ErrorAction SilentlyContinue
-	
-#$Key = [byte]1..16
-#$encrypted = Get-Content "$path`\$user.key" | ConvertTo-SecureString -Key $Key
-#$encrypted = Get-Content "C:\scripts\vmware\credentials\vmware.serivce@office.corp.key" | ConvertTo-SecureString -Key $Key
-#$credential = New-Object System.Management.Automation.PsCredential -ArgumentList ($user, $encrypted)
-#$credential = Import-CliXml -Path "$path\$user.xml"
-#$credential = Import-CliXml -Path "C:\scripts\vmware\credentials\vmware.service@office.corp.xml"
-#Connect-VIServer "dedc-bk-vci1.office.corp" -credential $credential -ErrorAction SilentlyContinue
-
+function CreateCredential($user, $pass, $vCenters) {
+	Foreach($v in $vCenters){
+		New-VICredentialStoreItem -Host $v -User $user -Password $pass -File C:\scripts\vmware\credentials\vmwareAuth.txt
+	}
 }
 
 function tagsByCategory($v, $category){

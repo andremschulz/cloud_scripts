@@ -1,7 +1,10 @@
 #!/bin/bash
 
 ###### REQUIRED VARIABLES #######
-NFSSR="/var/cloud_isos" 		# directory for NFS storage
+NFSSRs+=(
+"/var/primary" 
+"/var/secondary"
+) 		
 
 ###### CONFIGURE FIREWALLD #######
 printf "\n############### CONFIGURE FIREWALL ################\n"
@@ -27,13 +30,19 @@ sed -i 's/#RQUOTAD_PORT=875/RQUOTAD_PORT=875/'       				/etc/sysconfig/nfs
 sed -i 's/#STATD_PORT=662/STATD_PORT=662/'           				/etc/sysconfig/nfs
 sed -i 's/#STATD_OUTGOING_PORT=2020/STATD_OUTGOING_PORT=2020/' 		/etc/sysconfig/nfs
 
-if [ ! -d $NFSSR ]; then
-	mkdir $NFSSR
-fi
-chmod -R 755 $NFSSR
-chown nfsnobody:nfsnobody $NFSSR
+printf "" > /etc/exports
+for  (( i = 0; i < "${#NFSSRs[@]}"; i++ ))
+do
+	NFS=${vm_array[i]};
+	if [ ! -d $NFS ]; then
+		mkdir $NFS
+	fi
+	chmod -R 755 $NFS
+	chown nfsnobody:nfsnobody $NFS
 
-printf "$NFSSR         *(rw,no_root_squash,no_subtree_check)" >     /etc/exports
+	printf "$NFS         *(rw,no_root_squash,no_subtree_check)\n" >>     /etc/exports
+	
+done
 exportfs -a
 ##### NFS STATUS #########
 systemctl status nfs.service
