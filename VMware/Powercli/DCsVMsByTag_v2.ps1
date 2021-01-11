@@ -35,8 +35,8 @@ $reportList = @()
 		$vms = Get-VM -Location (Get-Datacenter -Server $v).Name
 		
 		
-		echo "Begining data mapping..."
 		$ListSize = $vms.Length
+		echo "Begining data mapping of $ListSize vms..."
 		$VMCounter = 1
 		$PrintMark = 10
 		
@@ -63,16 +63,18 @@ $reportList = @()
 			#$this.provisionedSpaceGB = [math]::Round($vm.Summary.Storage.UnCommitted/1GB,2)
 			#$this.datastore 			= $vm.Config.DatastoreUrl[0].Name
 			$vmList+=$this
-			#echo "$($VMCounter/$ListSize)"
-			if ("$(($VMCounter/$ListSize)*100)" > $PrintMark) {
+			echo "$VMCounter - $(($VMCounter/$ListSize)*10)"
+			
+			if ("$([Math]::Floor([decimal]($VMCounter/10)))" -gt $PrintMark) {
 				echo "$PrintMark%..."
 				$PrintMark+=10;
 			}
 		   $VMCounter++;
 		}
+		echo "Completed!"
 		#$vmList| where  {$_.name -eq "ILHQ-VMM01"} |select Name, Tags| Format-Table
 		echo "Policy filtering..."
-		$vmsByTag["no tag"]=@()
+		$vmsByTag["_NOTAG_"]=@()
 		foreach($vm in $vmList){
 			$flag = 0
 			foreach($tag in $vm.tags){
@@ -84,8 +86,8 @@ $reportList = @()
 				}
 			}
 			if($flag -eq 0) { 
-				$vm.tag = "no tag";
-				$vmsByTag["no tag"]+=$vm 
+				$vm.tag = "_NOTAG_";
+				$vmsByTag["_NOTAG_"]+=$vm 
 			}
 		}
 		
