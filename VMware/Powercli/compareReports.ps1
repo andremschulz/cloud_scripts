@@ -25,17 +25,18 @@ if ( $lastM -eq 12 ) {
 {
 	$lastY = (Get-Date).ToString("yyyy")
 }
-$reportList = @();
-
+$reportList = @()
+$changeList = ""
+$noCompareList = ""
 ForEach ($v in $vCenters) {
 	$d11="01/01/2021"
 	$d12="01/08/2021"
 	$d21="01/08/2021"
 	$d22="01/30/2021"
-	#$pastFiles    = Get-ChildItem -Path D:\vmware-output\CSVs -Filter *.csv | where-Object { $_.CreationTime -ge "$lastM/01/$lastY" -and $_.CreationTime -le "$lastM/31/$lastY"}
-	$pastFiles = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$d11" -and $_.CreationTime -le "$d12"}
-	#$presentFiles = Get-ChildItem -Path D:\vmware-output\CSVs -Filter *.csv | where-Object { $_.CreationTime -ge "$thisM/01/$thisY" -and $_.CreationTime -le "$thisM/31/$thisY"}
-	$presentFiles = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$d21" -and $_.CreationTime -le "$d22"}
+	$pastFiles     = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$lastM/01/$lastY" -and $_.CreationTime -le "$lastM/31/$lastY"} | Sort-Object -Property CreationTime
+	#$pastFiles    = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$d11" -and $_.CreationTime -le "$d12"} | Sort-Object -Property CreationTime
+	$presentFiles  = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$thisM/01/$thisY" -and $_.CreationTime -le "$thisM/31/$thisY"} | Sort-Object -Property CreationTime
+	#$presentFiles = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$d21" -and $_.CreationTime -le "$d22"} | Sort-Object -Property CreationTime
 	$old_csv = $pastFiles[-1]
 	$new_csv = $presentFiles[-1]
 	$old_csv
@@ -44,6 +45,7 @@ ForEach ($v in $vCenters) {
 	$presentList = Import-Csv "D:\vmware-output\CSVs\$new_csv"
 	$policies = $pastList.tag + $presentList.tag |Sort-Object -Descending |Get-Unique
 	$reportHTML = $(header("$v - backup policy changes"))
+	$flagChange = 0
 	$colourCount = 0;
 	ForEach($p in $policies) {
 		$colour   = $colours[$colourCount % $policies.count]
@@ -62,8 +64,8 @@ ForEach ($v in $vCenters) {
 		$i=0
 		for($i=0; $i -lt $max; $i++) {
 			#echo "$(@($addedVMs.InputObject)[$i]) vs $(@($removedVMs.InputObject)[$i])"
-			$report+= New-Object PSObject -Property @{added="$(@($addedVMs.InputObject)[$i])"; removed="$(@($removedVMs.InputObject)[$i])"} | Select-Object added, removed
-		
+			$report += New-Object PSObject -Property @{added="$(@($addedVMs.InputObject)[$i])"; removed="$(@($removedVMs.InputObject)[$i])"} | Select-Object added, removed
+			$flagChange = 1
 		}
 		if($i -eq 0) { $report+= New-Object PSObject -Property @{added=" "; removed=" "} | Select-Object added, removed }
 		if($p -eq ""){ $p = "ERROR - NO STRING PROVIDED" }
@@ -74,7 +76,21 @@ ForEach ($v in $vCenters) {
 	$outputHTML = "D:\vmware-output\HTMLs\$v`_PolicyCompare_" + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
 	ConvertTo-HTML -PostContent "$reportHTML" | Out-File -FilePath "$outputHTML"
 	$reportList += $outputHTML;
+	if($old_csv -eq "") { $flagChange = 2 }            ## check if there is old file to compare, raise flag
+	if($flagChange -eq 1) { $changeList += "$v, " }    ## if flag is up, there are no differences between reports, add vcenter to list
+	if($flagChange -eq 2) { $noCompareList += "$v, " } ## if flag is up, there are no old reports to compare between reports, add vcenter to list
 }
+if($changeList -eq "") { $changeList = "No difference has been observed since last month.
+" }
+else { $changeList = "There is difference in clusters: $changeList
+" }
+if($noCompareList -ne "") { $noCompareList = "There are no comparison reference reports for clusters: $noCompareList
+" } 
+$mailBody = "Backup comparison report for Black environment.
+
+$changeList 
+$noCompareList"
 echo "Sending mails..."
-if($em -eq "") { 	email -Body "Backup comparison report for Black environment" 		  -Subject "Global Black: Comparison report" -attachment $reportList }
-else { email -emailTo $em -Body "VMs by backup tag for each vcenter in Black environment" -Subject "Global Black: VMs by Backup tag" -attachment $reportList }
+if($em -eq "") { 	email -Body $mailBody -Subject "Global Black: Comparison report" -attachment $reportList }
+else { email -emailTo $em -Body $mailBody -Subject "Global Black: Comparison report" -attachment $reportList }
+exit

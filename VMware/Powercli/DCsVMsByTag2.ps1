@@ -10,7 +10,8 @@ Param(
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
  [string]$em=""
  )
-  
+ 
+
  $c="Veeam Backup"
  Set-Location -Path C:\scripts\vmware
 
@@ -63,12 +64,12 @@ $reportList = @()
 			#$this.provisionedSpaceGB = [math]::Round($vm.Summary.Storage.UnCommitted/1GB,2)
 			#$this.datastore 			= $vm.Config.DatastoreUrl[0].Name
 			$vmList+=$this
-			echo "$VMCounter - $(($VMCounter/$ListSize)*10)"
+			#echo "$VMCounter - $(($VMCounter/$ListSize)*10)"
 			
-			if ("$([Math]::Floor([decimal]($VMCounter/10)))" -gt $PrintMark) {
-				echo "$PrintMark%..."
-				$PrintMark+=10;
-			}
+			#if ("$([Math]::Floor([decimal](($VMCounter/$ListSize)*10)))" -gt $PrintMark) {
+			#	echo "$PrintMark%..."
+			#	$PrintMark+=10;
+			#}
 		   $VMCounter++;
 		}
 		echo "Completed!"
@@ -113,5 +114,6 @@ $reportList = @()
 	}
 }
 echo "Sending mails..."
-if($em -eq "") { email -Body "VMs by backup tag for each vcenter in Black environment" -Subject "Global Black: VMs by Backup tag" -attachment $reportList }
-else { email -emailTo $em -Body "VMs by backup tag for each vcenter in Black environment" -Subject "Global Black: VMs by Backup tag" -attachment $reportList }
+if($em -eq "") { email -Body "VMs by backup tag for each vcenter" -Subject "Global: VMs by Backup tag" -attachment $reportList }
+else { email -emailTo $em -Body "VMs by backup tag for each vcenter in environment" -Subject "Global: VMs by Backup tag" -attachment $reportList }
+exit

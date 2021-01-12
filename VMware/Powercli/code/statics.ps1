@@ -15,9 +15,11 @@ $header = @"
   <h1>$heading</h1>
 </div>
 "@
+
+return [string] $header
 }
 
-function body($klas){
+function body($klas, $columnWidth){
  $style = @"
  <style>
  body{
@@ -35,6 +37,7 @@ function body($klas){
  }
  
  table.t$klas td{
+  width: $columnWidth;
   font-size: 12px;
   padding-left: 0px;
   padding-right: 20px;
@@ -46,7 +49,7 @@ function body($klas){
   font-weight: bold;
   padding-left: 0px;
   padding-right: 20px;
-  text-align: left;
+  text-align: center;
  }
  
  h2{
@@ -83,8 +86,8 @@ function login($vCenter, $user, $pass) {
 	
 	Write-host $pass
 	if($user -eq "") { 
-		$credentials = Get-VICredentialStoreItem -Host $vCenter -File C:\scripts\vmware\credentials\vmwareAuth.txt
-		Write-host "yes"
+		$credfile = "C:\scripts\vmware\credentials\$($env:UserName)_vmware.service@XXXX.XXXX"
+		$credentials = Get-VICredentialStoreItem -Host $vCenter -File $credfile
 		$connection = connect-viserver $vCenter -User $credentials.User -Password $credentials.Password -ErrorAction SilentlyContinue
 	}
 	else {
@@ -125,14 +128,14 @@ Function email {
         [Parameter(Mandatory=$true)]
         [String]$Body,
         [Parameter(Mandatory=$false)]
-        [String]$EmailFrom=$env:computername + "@office.corp",
+        [String]$EmailFrom=$env:computername + "@XXXX.XXXX",
         [Parameter(mandatory=$false)]
         [Array]$attachment,
         [Parameter(mandatory=$false)]   
         [String]$Password
     )
 
-        $SMTPServer = "sr-fr-smtp.office.corp" 
+        $SMTPServer = "XXXX.XXXX.XXXX" 
         $SMTPMessage = New-Object System.Net.Mail.MailMessage($EmailFrom,$EmailTo,$Subject,$Body)
         if ($attachment.count -gt 0) {
 			foreach($a in $attachment) {
@@ -180,8 +183,10 @@ function eol {
 }
 
 function CreateCredential($user, $pass, $vCenters) {
+	#use to create new items: CreateCredential user@domain.int 'password' $vCenters
+	$target = "C:\scripts\vmware\credentials\$($env:UserName)_vmware.service@XXXX.XXXX"
 	Foreach($v in $vCenters){
-		New-VICredentialStoreItem -Host $v -User $user -Password $pass -File C:\scripts\vmware\credentials\vmwareAuth.txt
+		New-VICredentialStoreItem -Host $v -User $user -Password $pass -File $target
 	}
 }
 
