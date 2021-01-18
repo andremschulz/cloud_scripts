@@ -41,30 +41,32 @@ ForEach ($v in $vCenters) {
 	$new_csv = $presentFiles[-1]
 	$old_csv
 	$new_csv
-	$pastList = Import-Csv "D:\vmware-output\CSVs\$old_csv"
+	$pastList    = Import-Csv "D:\vmware-output\CSVs\$old_csv"
 	$presentList = Import-Csv "D:\vmware-output\CSVs\$new_csv"
-	$policies = $pastList.tag + $presentList.tag |Sort-Object -Descending |Get-Unique
-	$reportHTML = $(header("$v - backup policy changes"))
-	$flagChange = 0
+	$policies    = $pastList.tag + $presentList.tag |Sort-Object -Descending |Get-Unique
+	$reportHTML  = $(header("$v - backup policy changes"))
+	$flagChange  = 0
 	$colourCount = 0;
+
 	ForEach($p in $policies) {
-		$colour   = $colours[$colourCount % $policies.count]
-		$pastVMs = ($pastList | where-Object { $_.tag -eq $p } | Select Name).Name
+		$colour     = $colours[$colourCount % $policies.count]
+		$pastVMs    = ($pastList    | where-Object { $_.tag -eq $p } | Select Name).Name
 		$presentVMs = ($presentList | where-Object { $_.tag -eq $p } | Select Name).Name
 		echo "================================ $p ===================================="
-		$addedVMs = Compare-Object -ReferenceObject @($pastVMs | Select-Object) -DifferenceObject @($presentVMs | Select-Object) | Where-Object {$_.SideIndicator -eq "=>" }
-		$removedVMs = Compare-Object -ReferenceObject @($pastVMs | Select-Object) -DifferenceObject @($presentVMs | Select-Object) | Where-Object {$_.SideIndicator -eq "<=" }
+		$addedVMs   = (Compare-Object -ReferenceObject @($pastVMs | Select-Object) -DifferenceObject @($presentVMs | Select-Object) | Where-Object {$_.SideIndicator -eq "=>" }).InputObject
+		$removedVMs = (Compare-Object -ReferenceObject @($pastVMs | Select-Object) -DifferenceObject @($presentVMs | Select-Object) | Where-Object {$_.SideIndicator -eq "<=" }).InputObject
+		echo "added are $addedVMs"
+		echo "removed are $removedVMs"
 		$report = @();
-		
-		if($addedVMs.count -gt $removedVMs.count) {
-			$max = $addedVMs.count
+		if(@($addedVMs).Length -gt @($removedVMs).Length) {
+			$max = @($addedVMs).Length
 		} else {
-			$max = $removedVMs.count
+			$max = @($removedVMs).Length
 		}
 		$i=0
 		for($i=0; $i -lt $max; $i++) {
-			#echo "$(@($addedVMs.InputObject)[$i]) vs $(@($removedVMs.InputObject)[$i])"
-			$report += New-Object PSObject -Property @{added="$(@($addedVMs.InputObject)[$i])"; removed="$(@($removedVMs.InputObject)[$i])"} | Select-Object added, removed
+			#echo "$(@($addedVMs)[$i]) vs $(@($removedVMs)[$i])"
+			$report += New-Object PSObject -Property @{added="$(@($addedVMs)[$i])"; removed="$(@($removedVMs)[$i])"} | Select-Object added, removed
 			$flagChange = 1
 		}
 		if($i -eq 0) { $report+= New-Object PSObject -Property @{added=" "; removed=" "} | Select-Object added, removed }
