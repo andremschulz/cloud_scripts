@@ -16,54 +16,50 @@ Set-Location -Path C:\scripts\vmware
 $colours = '#FFEFE6', '#FFFBE1', '#EDFFE2', '#E8F5FF', '#FCD2FF', '#D2FFFC', '#FFD2FA'
 $vCenters = ""
 
-$thisM = (Get-Date).ToString('MM')
-$thisY = (Get-Date).ToString("yyyy")
-$lastM = (Get-Date).AddMonths(-1).ToString('MM')
-if ( $lastM -eq 12 ) { 
-	$lastY = (Get-Date).AddYears(-1).ToString("yyyy")
-} else 
-{
-	$lastY = (Get-Date).ToString("yyyy")
-}
+$lastStart = Get-Date (Get-Date).AddMonths(-1) -day 1 -hour 0 -minute 0 -second 0
+$lastEnd   =  ($lastStart).AddMonths(1).AddSeconds(-1)
+$thisStart = Get-Date -day 1 -hour 0 -minute 0 -second 0
+$thisEnd   = ($thisStart).AddMonths(1).AddSeconds(-1)
+echo "Previous: $lastStart to $lastEnd"
+echo "Current:  $thisStart to $thisEnd"
 $reportList = @()
 $changeList = ""
 $noCompareList = ""
 ForEach ($v in $vCenters) {
-	$d11="01/01/2021"
-	$d12="01/08/2021"
-	$d21="01/08/2021"
-	$d22="01/30/2021"
-	$pastFiles     = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$lastM/01/$lastY" -and $_.CreationTime -le "$lastM/31/$lastY"} | Sort-Object -Property CreationTime
-	#$pastFiles    = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$d11" -and $_.CreationTime -le "$d12"} | Sort-Object -Property CreationTime
-	$presentFiles  = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$thisM/01/$thisY" -and $_.CreationTime -le "$thisM/31/$thisY"} | Sort-Object -Property CreationTime
-	#$presentFiles = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$d21" -and $_.CreationTime -le "$d22"} | Sort-Object -Property CreationTime
-	$old_csv = $pastFiles[-1]
-	$new_csv = $presentFiles[-1]
-	$old_csv
-	$new_csv
+	write-host "================================ $v ====================================`r`n"
+	$pastFiles     = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$lastStart" -and $_.CreationTime -le "$lastEnd"} | Sort-Object -Property CreationTime
+	$presentFiles  = Get-ChildItem -Path D:\vmware-output\CSVs -Filter "$v*.csv" | where-Object { $_.CreationTime -ge "$thisStart" -and $_.CreationTime -le "$thisEnd"} | Sort-Object -Property CreationTime
+	$old_csv = @($pastFiles)[-1]
+	echo "OLD FILE: $old_csv"
+	$new_csv = @($presentFiles)[-1]
+	echo "NEW FILE: $new_csv"
+	$presentList = ""
+	$pastList    = ""
 	$pastList    = Import-Csv "D:\vmware-output\CSVs\$old_csv"
 	$presentList = Import-Csv "D:\vmware-output\CSVs\$new_csv"
 	$policies    = $pastList.tag + $presentList.tag |Sort-Object -Descending |Get-Unique
 	$reportHTML  = $(header("$v - backup policy changes"))
-	$flagChange  = 0
-	$colourCount = 0;
+	$colourCount = 0
 
 	ForEach($p in $policies) {
+		$flagChange  = 0
 		$colour     = $colours[$colourCount % $policies.count]
 		$pastVMs    = ($pastList    | where-Object { $_.tag -eq $p } | Select Name).Name
 		$presentVMs = ($presentList | where-Object { $_.tag -eq $p } | Select Name).Name
-		echo "================================ $p ===================================="
+		echo "`r`n>>>>> $p <<<<<<"
 		$addedVMs   = (Compare-Object -ReferenceObject @($pastVMs | Select-Object) -DifferenceObject @($presentVMs | Select-Object) | Where-Object {$_.SideIndicator -eq "=>" }).InputObject
 		$removedVMs = (Compare-Object -ReferenceObject @($pastVMs | Select-Object) -DifferenceObject @($presentVMs | Select-Object) | Where-Object {$_.SideIndicator -eq "<=" }).InputObject
-		echo "added are $addedVMs"
-		echo "removed are $removedVMs"
+		echo "$(@($addedVMs).Length) added - $addedVMs"
+		echo "$(@($removedVMs).Length) removed - $removedVMs"
 		$report = @();
-		if(@($addedVMs).Length -gt @($removedVMs).Length) {
+		if(@($addedVMs)[0] -eq $null -AND @($addedVMs)[0] -eq $null) {
+			$max = 0
+			echo "YES IT IS!"
+		} elseif(@($addedVMs).Length -gt @($removedVMs).Length) {
 			$max = @($addedVMs).Length
 		} else {
 			$max = @($removedVMs).Length
 		}
-		$i=0
 		for($i=0; $i -lt $max; $i++) {
 			#echo "$(@($addedVMs)[$i]) vs $(@($removedVMs)[$i])"
 			$report += New-Object PSObject -Property @{added="$(@($addedVMs)[$i])"; removed="$(@($removedVMs)[$i])"} | Select-Object added, removed
@@ -75,6 +71,7 @@ ForEach ($v in $vCenters) {
 		$reportHTML +=  $report -replace '<table>',"<table class=`"t$colourCount`">"
 		$colourCount++
 	}
+	echo "change is $flagChange"
 	$outputHTML = "D:\vmware-output\HTMLs\$v`_PolicyCompare_" + (get-date -Format "dd/MM/yyyy/HH/mm") + ".html"
 	ConvertTo-HTML -PostContent "$reportHTML" | Out-File -FilePath "$outputHTML"
 	$reportList += $outputHTML;

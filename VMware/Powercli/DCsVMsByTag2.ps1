@@ -10,7 +10,6 @@ Param(
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
  [string]$em=""
  )
- 
 
  $c="Veeam Backup"
  Set-Location -Path C:\scripts\vmware
@@ -114,6 +113,6 @@ $reportList = @()
 	}
 }
 echo "Sending mails..."
-if($em -eq "") { email -Body "VMs by backup tag for each vcenter" -Subject "Global: VMs by Backup tag" -attachment $reportList }
+if($em -eq "") { email -Body "VMs by backup tag for each vcenter in environment" -Subject "Global: VMs by Backup tag" -attachment $reportList }
 else { email -emailTo $em -Body "VMs by backup tag for each vcenter in environment" -Subject "Global: VMs by Backup tag" -attachment $reportList }
 exit

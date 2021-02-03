@@ -1,14 +1,14 @@
 #!/bin/bash
 
 ###### REQUIRED VARIABLES #######
-NFSSRs+=(
+NFSSRs=(
 "/var/primary" 
 "/var/secondary"
 ) 		
 
 ###### CONFIGURE FIREWALLD #######
 printf "\n############### CONFIGURE FIREWALL ################\n"
-yum -y -q install firewalld
+#yum -y -q install firewalld
 systemctl start firewalld.service
 systemctl enable firewalld.service
 firewall-cmd --permanent --add-service=ssh
@@ -19,9 +19,16 @@ firewall-cmd --reload
 
 ##### CONFIGURE NFS #########
 printf "\n############### CONFIGURE NFS ################\n"
-yum install nfs-utils -y -q
-systemctl enable nfs-server.service
-systemctl start nfs-server.service
+#yum install nfs-utils -y -q
+systemctl enable rpcbind
+systemctl enable nfs-server
+systemctl enable nfs-lock
+systemctl enable nfs-idmap
+systemctl start rpcbind
+systemctl start nfs-server
+systemctl start nfs-lock
+systemctl start nfs-idmap
+
 
 sed -i 's/#LOCKD_TCPPORT=32803/LOCKD_TCPPORT=32803/' 				/etc/sysconfig/nfs
 sed -i 's/#LOCKD_UDPPORT=32769/LOCKD_UDPPORT=32769/' 				/etc/sysconfig/nfs
@@ -33,7 +40,7 @@ sed -i 's/#STATD_OUTGOING_PORT=2020/STATD_OUTGOING_PORT=2020/' 		/etc/sysconfig/
 printf "" > /etc/exports
 for  (( i = 0; i < "${#NFSSRs[@]}"; i++ ))
 do
-	NFS=${vm_array[i]};
+	NFS=${NFSSRs[i]};
 	if [ ! -d $NFS ]; then
 		mkdir $NFS
 	fi
