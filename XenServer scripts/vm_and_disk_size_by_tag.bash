@@ -8,8 +8,10 @@ declare -A VMsByIndex
 
 ## arrays with data
 declare -A VMnames   # collects the VM names
+declare -A VMdesc    # collects description fields
 declare -A VMsizes   # collects the VM sizes
 declare -A VMstates  # collects the VM power states
+declare -A VMips	 # collects the VM ip addresses
 declare -A VMtags    # collects the VM power states
 
 
@@ -104,13 +106,13 @@ $head
  </style> </head>" > $output;
 	 echo "<body> $cluster <table class=\"t$class\">" >> $output;
 	 echo "<colgroup><col/><col/><col/><col/></colgroup>" >> $output;
-	 echo "<tr><th>Name</th><th>State</th><th>Total size(GB)</th><th>Tag</th></tr>" >> $output;
+	 echo "<tr><th>Name</th><th>State</th><th>Total size(GB)</th><th>Tag</th><th>IP address</th><th>description</th></tr>" >> $output;
 	
 	 for UUID in "${UUIDs[@]}"
 	 do
 		skipVM "${VMnames[$UUID]}" "$UUID"
 		if [ "$?" == "1" ]; then continue; fi
-		echo "<tr><td>${VMnames[$UUID]}</td><td>${VMstates[$UUID]}</td><td>${VMsizes[$UUID]}</td><td>${VMtags[$UUID]}</td></tr>" >> $output
+		echo "<tr><td>${VMnames[$UUID]}</td><td>${VMstates[$UUID]}</td><td>${VMsizes[$UUID]}</td><td>${VMtags[$UUID]}</td><td>${VMips[$UUID]}</td><td>${VMdesc[$UUID]}</td></tr>" >> $output
 	 done
 	 echo "</table>  </body>" >> $output
 }
@@ -128,7 +130,10 @@ do
 	VMnames["$UUID"]="$VMNAME";
 	skipVM "$VMNAME" "$UUID"
 	if [ "$?" == "1" ]; then continue; fi
-	
+
+### get VM description
+	VMdesc["$UUID"]="$(xe vm-list uuid=$UUID params=name-description| awk '{gsub(/name-description \( RW\)    \: /,"")}1'|grep -v "^$")";
+	#echo "${VMdesc[$UUID]}"
 ### get disk total size
 	VMVBDS=($(xe vm-disk-list uuid=$UUID| grep "VDI:" -A 1 |grep uuid |cut "-c26-"))
 	VMSIZE=0;
@@ -143,6 +148,8 @@ do
 	VMstates["$UUID"]="$(xe vm-list uuid=$UUID params=power-state  |cut "-c24-")";
 	#echo "state ${VMstates[$UUID]}"
 	
+### Get IPs
+	VMips["$UUID"]="$(xe vm-list uuid=$UUID params=networks |cut "-c21-" | awk '{gsub(/.\/ip: |.\/ipv.[^;]*;/,"")}1' | awk '{gsub(/.\/ipv.*$/,"")}1' | awk '{gsub(/ /,"")}1')"
 ### Populate tag arrays (for future filter use)
 	IFS=', ' read -r -a VMTAG <<< "$(xe vm-list uuid=$UUID params=tags  | cut "-c17-")";
 	VMtags["$UUID"]="${VMTAG[@]}";
@@ -178,3 +185,5 @@ for idx in "${!TagIndex[@]}";
 do
 	echo "$idx - ${TagVMCount[$idx]}";
 done
+
+
