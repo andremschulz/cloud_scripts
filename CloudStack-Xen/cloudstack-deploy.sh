@@ -16,42 +16,13 @@ yum repolist
 ## Configure cloudstack repo
 printf "\n############### YUM CONFIG ################\n"
 rpm --import http://packages.shapeblue.com/release.asc
-echo "[cloudstack]
+echo "[cloudstack-4.15]
 name=cloudstack
-baseurl=http://packages.shapeblue.com/cloudstack/upstream/centos7/4.14
+baseurl=http://packages.shapeblue.com/cloudstack/upstream/centos7/4.15
 enabled=1
-gpgcheck=0" > /etc/yum.repos.d/cloudstack.repo
+gpgcheck=1
+gpgkey=http://packages.shapeblue.com/release.asc" > /etc/yum.repos.d/cloudstack.repo
 cat /etc/yum.repos.d/cloudstack.repo
-#gpgkey=http://packages.shapeblue.com/release.asc
-
-## Configure database
-printf "\n############### DATABASE CONFIG ################\n"
-rpm -ivh mysql-community-release-el7-5.noarch.rpm
-yum install #!/bin/bash
-## Cloudstack auto-deployment script for Centos 7.
-## place deploy_cloudstack.sh and mysql_secure files in one directory and give them execute rights.
-## Set Vars below and execute ./deploy_cloudstack.sh
-
-## Defining vars
-WORK_DIR="/tmp"
-db_root_password="root"			## mariadb root password
-db_cloud_password="cloud"       ## password for mariadb cloudstack user cloud
-
-## Installing prerequisites
-printf "\n############### PREREQUISITES ################\n"
-yum install expect epel-release -y -q
-yum repolist
-
-## Configure cloudstack repo
-printf "\n############### YUM CONFIG ################\n"
-rpm --import http://packages.shapeblue.com/release.asc
-echo "[cloudstack]
-name=cloudstack
-baseurl=http://packages.shapeblue.com/cloudstack/upstream/centos7/4.14
-enabled=1
-gpgcheck=0" > /etc/yum.repos.d/cloudstack.repo
-cat /etc/yum.repos.d/cloudstack.repo
-#gpgkey=http://packages.shapeblue.com/release.asc
 
 ## Configure database
 printf "\n############### DATABASE CONFIG ################\n"
