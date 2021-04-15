@@ -104,6 +104,7 @@ systemctl status mariadb
 #on the master node 1
 galera_new_cluster
 mysql -u root -p -e "SHOW STATUS LIKE 'wsrep_cluster_size'"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'password';"
 
 #on the other nodes
 sudo systemctl start mariadb

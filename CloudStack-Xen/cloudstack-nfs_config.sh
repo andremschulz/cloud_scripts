@@ -2,7 +2,6 @@
 
 ###### REQUIRED VARIABLES #######
 NFSSRs=(
-"/var/primary" 
 "/var/secondary"
 ) 		
 
@@ -15,11 +14,25 @@ firewall-cmd --permanent --add-service=ssh
 firewall-cmd --permanent --add-service=nfs
 firewall-cmd --permanent --add-service=mountd
 firewall-cmd --permanent --add-service=rpc-bind
+firewall-cmd --permanent --add-port=111/tcp
+firewall-cmd --permanent --add-port=111/udp
+#firewall-cmd --permanent --add-port=1110/udp
+#firewall-cmd --permanent --add-port=1110/tcp
+#firewall-cmd --permanent --add-port=54302/tcp
+#firewall-cmd --permanent --add-port=20048/tcp
+firewall-cmd --permanent --add-port=2049/tcp
+firewall-cmd --permanent --add-port=2049/udp
+#firewall-cmd --permanent --add-port=4045/tcp
+#firewall-cmd --permanent --add-port=4045/udp
+#firewall-cmd --permanent --add-port=46666/tcp
+#firewall-cmd --permanent --add-port=42955/tcp
+#firewall-cmd --permanent --add-port=875/tcp
+firewall-cmd --permanent --add-port=892/udp
 firewall-cmd --reload
 
 ##### CONFIGURE NFS #########
 printf "\n############### CONFIGURE NFS ################\n"
-#yum install nfs-utils -y -q
+yum install nfs-utils -y -q
 systemctl enable rpcbind
 systemctl enable nfs-server
 systemctl enable nfs-lock
@@ -51,6 +64,12 @@ do
 	
 done
 exportfs -a
+systemctl restart nfs-server
 ##### NFS STATUS #########
 systemctl status nfs.service
 
+
+
+##pvcreate /dev/xxx
+##vgcreate secondaryNFS /dev/xxx
+##lvcreate -n secondaryNFS -l 100%FREE secondaryNFS
