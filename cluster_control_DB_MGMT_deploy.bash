@@ -20,3 +20,6 @@ log-bin=mysql-bin
 
 # deploy cluster 
 s9s cluster --create --cluster-type=galera --nodes="$IP01;$IP02"  --vendor=mariadb --provider-version=10.5 --db-admin-passwd="password" --os-user=root --cluster-name="BGHQ-RD-CSTACK" --wait
+
+
+

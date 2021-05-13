@@ -105,13 +105,19 @@ systemctl status mariadb
 galera_new_cluster
 mysql -u root -p -e "SHOW STATUS LIKE 'wsrep_cluster_size'"
 mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'password';"
+mysql -u root -p -e "FLUSH PRIVILEGES;"
+# mysql -u root -p'password' -h xx.xx.xx.xx -P 33306   -D local ## to troubleshoot access
 
 #on the other nodes
 sudo systemctl start mariadb
 sudo systemctl status mariadb
 
-
-
+## After NFS is configured exceute on the master node
+mkdir -p /mnt/secondary
+sudo mount -t nfs BGHQ-RD-NFS01:/export/secondary /mnt/secondary
+/usr/share/cloudstack-common/scripts/storage/secondary/cloud-install-sys-tmplt -m /mnt/secondary -u http://download.cloudstack.org/systemvm/4.15/systemvmtemplate-4.15.1-xen.vhd.bz2 -h xenserver -F
+umount /mnt/secondary
+rmdir /mnt/secondary
 ####galera commands
 #  mysql  -e "SHOW STATUS LIKE 'wsrep_cluster_size'"                  ## Get cluster members (find how many arein the cluster)
 #  mysql  -e "SHOW STATUS LIKE 'wsrep_local_state_comment'"           ## find if node is synced

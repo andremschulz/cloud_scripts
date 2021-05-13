@@ -1,0 +1,18 @@
+Cloudstack database:
+- template_store_ref -  ISO repository
+- vm_template - 
+
+
+system VMs diagnostic command
+ssh -i /root/.ssh/id_rsa.cloud -p 3922 169.254.35.63
+ssh -i /root/.ssh/id_rsa.cloud -p 3922 169.254.115.113
+ssh -i /root/.ssh/id_rsa.cloud -p 3922 169.254.150.152
+/usr/local/cloud/systemvm/ssvm-check.sh
+
+
+- Cannot upload ISO from localhost - ERR_CERT_COMMON_NAME_INVALID 
+
+
+The trafficlabel for VMWARE is in the format "vSwtichName,VLAN,typeofswitch", the default for ESX being " vSwitch0,,vmwaresvs"
+
+
