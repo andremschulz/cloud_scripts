@@ -43,11 +43,10 @@ datasource:
 echo "system_info:
     default_user:
      name: cloud-user
-	 gecos: Cloud user
      lock_passwd: false
      sudo: [\"ALL=(ALL) ALL\"]
-disable_root: False
-ssh_pwauth: True" > /etc/cloud/cloud.cfg.d/80_root.cfg
+disable_root: 0
+ssh_pwauth: 1" > /etc/cloud/cloud.cfg.d/80_root.cfg
  
   echo "growpart:
     mode: auto

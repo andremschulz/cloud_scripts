@@ -42,7 +42,6 @@ sudo sed -i s/"set-passwords"/"[set-passwords, always]"/g /etc/cloud/cloud.cfg
 echo "system_info:
     default_user:
      name: cloud-user
-	 gecos: Cloud user
      lock_passwd: false
      sudo: [\"ALL=(ALL) ALL\"]
 disable_root: 0
