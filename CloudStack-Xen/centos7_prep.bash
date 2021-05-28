@@ -2,11 +2,11 @@
 yum -y update 
 
 ## install cloud-init
-yum -y install cloud-init cloud-utils-growpart
+yum -y install cloud-init cloud-utils-growpart wget
 
 ## install additional packages
 yum -y install epel-repo
-yum -y install tcpdump psmisc bind-utils net-tools wget mc chrony vim
+yum -y install tcpdump psmisc bind-utils net-tools mc chrony vim
 
 ## set interface config
 echo "DEVICE=eth0
@@ -25,12 +25,14 @@ sestatus
 
 echo "datasource: ConfigDrive, CloudStack" > /etc/cloud/ds-identify.cfg 
 sudo sed -i s/" - set-passwords"/" - [set-passwords, always]"/g /etc/cloud/cloud.cfg
+sudo sed -i s/" - runcmd"/" - [runcmd, always]"/g /etc/cloud/cloud.cfg
+sudo sed -i s/" - scripts-user"/" - [scripts-user, always]"/g /etc/cloud/cloud.cfg
 
 echo "system_info:
-    default_user:
-     name: cloud-user
-     lock_passwd: false
-     sudo: [\"ALL=(ALL) ALL\"]
+  default_user:
+    name: cloud-user
+    lock_passwd: false
+    sudo: [\"ALL=(ALL) ALL\"]
 disable_root: 0
 ssh_pwauth: 1" > /etc/cloud/cloud.cfg.d/80_root.cfg
 
@@ -40,15 +42,15 @@ echo "growpart:
         - \"/dev/xvda2\"
     ignore_growroot_disabled: false" > /etc/cloud/cloud.cfg.d/50_growpartion.cfg
 
-echo "bootcmd:
-  - [ cloud-init-per, always, grow_VG, pvresize, /dev/xvda2 ]
-  - [ cloud-init-per, always, grow_LV, lvresize, -l, '+100%FREE', /dev/centos/root ]
-  - [ cloud-init-per, always, grow_FS, xfs_growfs, /dev/centos/root ]" > /etc/cloud/cloud.cfg.d/51_extend_volume.cfg
+echo "runcmd:
+  - [ pvresize, /dev/xvda2 ]
+  - [ lvresize, -l, '+100%FREE', /dev/centos/root ]
+  - [ xfs_growfs, /dev/centos/root ]" > /etc/cloud/cloud.cfg.d/51_extend_volume.cfg
   
 ## install xentools
 
 ## make Yaml valid filetype for ansible, change TAB key to add spaces instead of tabs
-echo "autocmd FileType yaml setlocal ai ts=2 sw=2 et" >> /etc/vimrc 
+echo "autocmd FileType yaml setlocal ai ts=2 sw=2 et" >> /etc/vimrc
 
 ## clean cloud-init
 rm -rf /var/lib/cloud/data/*
@@ -77,3 +79,7 @@ unset HISTFILE
 #easy_install-3.6 pip
 #pip3 install --upgrade pip
 ##pip3 install ansible //not needed for client/dev vms
+
+# sudo sed -i s/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+# systemctl restart sshd
+# userdel -r cloud-user
