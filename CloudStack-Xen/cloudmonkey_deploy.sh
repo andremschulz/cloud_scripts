@@ -6,6 +6,7 @@ apikey='xxxx'
 secretkey='xxxx'
 
 ## install cloudmonkey
+yum install jq -y   # preprequisite: lightweight command-line JSON processor
 yum install python-pip -y
 pip install --upgrade "pip < 21.0"
 python2 -m pip install cloudmonkey

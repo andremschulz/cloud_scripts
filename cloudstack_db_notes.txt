@@ -16,3 +16,5 @@ ssh -i /root/.ssh/id_rsa.cloud -p 3922 169.254.150.152
 The trafficlabel for VMWARE is in the format "vSwtichName,VLAN,typeofswitch", the default for ESX being " vSwitch0,,vmwaresvs"
 
 
+### how to enable Kubernetes service
+

@@ -18,26 +18,13 @@ ONBOOT=yes" > /etc/sysconfig/network-scripts/ifcfg-eth0
 hostname localhost
 echo "localhost" > /etc/hostname
 
-## disable selinux 
+## disable selinux
 sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
 setenforce permissive
 sestatus
 
-## forces the user to change the password of the VM after the template has been deployed.
-#passwd --expire root
-
-## config cloud-init
-systemctl enable cloud-init
-systemctl enable cloud-init-local.service
-systemctl enable cloud-init.service
-systemctl enable cloud-config.service
-systemctl enable cloud-final.service
-systemctl enable cloud-init.service
-systemctl enable cloud-config.service
-systemctl enable cloud-final.service
-
 echo "datasource: ConfigDrive, CloudStack" > /etc/cloud/ds-identify.cfg 
-sudo sed -i s/"set-passwords"/"[set-passwords, always]"/g /etc/cloud/cloud.cfg
+sudo sed -i s/" - set-passwords"/" - [set-passwords, always]"/g /etc/cloud/cloud.cfg
 
 echo "system_info:
     default_user:
@@ -53,7 +40,7 @@ echo "growpart:
         - \"/dev/xvda2\"
     ignore_growroot_disabled: false" > /etc/cloud/cloud.cfg.d/50_growpartion.cfg
 
-echo "runcmd:
+echo "bootcmd:
   - [ cloud-init-per, always, grow_VG, pvresize, /dev/xvda2 ]
   - [ cloud-init-per, always, grow_LV, lvresize, -l, '+100%FREE', /dev/centos/root ]
   - [ cloud-init-per, always, grow_FS, xfs_growfs, /dev/centos/root ]" > /etc/cloud/cloud.cfg.d/51_extend_volume.cfg

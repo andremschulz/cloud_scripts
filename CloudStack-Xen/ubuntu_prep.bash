@@ -9,9 +9,6 @@ apt-get install cloud-init cloud-initramfs-growroot -y
 ## install additional packages
 apt-get install tcpdump psmisc net-tools wget mc chrony vim -y
 
-## forces the user to change the password of the VM after the template has been deployed.
-#passwd --expire root
-
 ## set interface config
 echo "DEVICE=eth0
 TYPE=Ethernet
@@ -28,10 +25,7 @@ setenforce permissive
 sestatus
 
 ## config cloud-init
-#sudo sed -i s/"set-passwords"/"[set-passwords, always]"/g /etc/cloud/cloud.cfg
-#sudo sed -i s/"name: ubuntu"/"name: cloud-user"/g /etc/cloud/cloud.cfg
-#sudo sed -i s/"lock_passwd: True"/"lock_passwd: False"/g /etc/cloud/cloud.cfg
-#sudo sed -i s/"gecos: Ubuntu"/"gecos: Cloud User"/g /etc/cloud/cloud.cfg
+sudo sed -i s/" - set-passwords"/" - [set-passwords, always]"/g /etc/cloud/cloud.cfg
 
 echo "datasource_list: [ ConfigDrive, CloudStack, None ]
 datasource:
@@ -54,7 +48,7 @@ ssh_pwauth: 1" > /etc/cloud/cloud.cfg.d/80_root.cfg
         - \"/dev/xvda3\"
     ignore_growroot_disabled: false" > /etc/cloud/cloud.cfg.d/50_growpartion.cfg
 	
-echo "runcmd:
+echo "bootcmd:
   - [ cloud-init-per, always, grow_VG, pvresize, /dev/xvda3 ]
   - [ cloud-init-per, always, grow_LV, lvresize, -l, '+100%FREE', /dev/ubuntu-vg/ubuntu-lv ]
   - [ cloud-init-per, always, grow_FS, xfs_growfs, /dev/ubuntu-vg/ubuntu-lv ]" > /etc/cloud/cloud.cfg.d/51_extend_volume.cfg
