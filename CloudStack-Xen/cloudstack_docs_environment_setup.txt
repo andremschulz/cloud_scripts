@@ -7,4 +7,4 @@
 -- In powershell launch - choco install sphinx
 -- get Sphinx RTD theme - pip install sphinx-rtd-theme
 4. Open CMD and type - sphinx-quickstart to create new OR browse existing documentation - cd C:\Users\%USERNAME%\Documents\GitHub\cloudstack-documentation
-6. rmdir build /s /q & make html
+5. rmdir build /s /q & make html
