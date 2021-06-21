@@ -70,8 +70,6 @@ systemctl restart nfs-server
 ##### NFS STATUS #########
 systemctl status nfs.service
 
-
-
 ##pvcreate /dev/xxx
 ##vgcreate secondaryNFS /dev/xxx
 ##lvcreate -n secondaryNFS -l 100%FREE secondaryNFS

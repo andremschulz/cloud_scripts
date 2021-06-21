@@ -44,15 +44,13 @@ printf "\n############### CLOUDSTACK CONFIG ################\n"
 yum install cloudstack-management -y -q
 alternatives --config java
 cloudstack-setup-databases cloud:$db_cloud_password@localhost --deploy-as=root:root
-## second server should execute this command instaed
+## second server should execute this command instead
 ## cloudstack-setup-databases cloud:$db_cloud_password@192.168.1.10:33306
 ## Please ensure the following ports are open for the management server to function properly : 8080 8250 8443 9090
 cloudstack-setup-management
-
 ### xenserver post install commands
 wget http://download.cloudstack.org/tools/vhd-util -P $WORK_DIR
 yes | cp $WORK_DIR/vhd-util /usr/share/cloudstack-common/scripts/vm/hypervisor/xenserver/vhd-util
-
 
 ##### post installation tasks
 ## 1. After NFS is mounted

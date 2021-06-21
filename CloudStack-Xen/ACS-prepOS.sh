@@ -10,6 +10,7 @@ DNS2=""
 FQDN=""
 NTP1=""
 NTP2=""
+TIMEZONE="Europe/Sofia"
 
 ## Update system
 printf "\n############### UPDATE SYSTEM ################\n"
@@ -43,7 +44,7 @@ sytemctl enable ntpd 2>/dev/null
 sed -i "s/0.centos.pool.ntp.org/$NTP1/g" /etc/ntp.conf /etc/ntp.conf
 sed -i "s/1.centos.pool.ntp.org/$NTP2/g" /etc/ntp.conf /etc/ntp.conf
 systemctl start ntpd
-timedatectl set-timezone Europe/Sofia
+timedatectl set-timezone $TIMEZONE
 ntpq -p
 date -R
 

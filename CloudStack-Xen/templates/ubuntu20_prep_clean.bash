@@ -1,6 +1,11 @@
 #!/bin/bash
 # Description: update OS and install and configure cloud-init as a Cloudstack middlewere
 
+## Prerequisites
+# sudo sed -i s/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+# systemctl restart sshd
+# passwrd root
+
 apt-get update
 apt-get upgrade -y
 
@@ -48,10 +53,13 @@ echo "runcmd:
   - [ lvresize, -l, '+100%FREE', /dev/ubuntu-vg/ubuntu-lv ]
   - [ xfs_growfs, /dev/ubuntu-vg/ubuntu-lv ]" > /etc/cloud/cloud.cfg.d/51_extend_volume.cfg
 
+##set repositories
+#sed -i "s/deb/#deb/g" /etc/apt/sources.list
+
 ## Template Cleanup
-rm -rf /var/lib/cloud/data/*
-rm -rf /var/lib/cloud/instance/*
-rm -rf /var/lib/cloud/instances/*
+userdel -r cloud-user
+rm -rf /etc/sudoers.d/*              ## clean any users created by cloud-init
+rm -rf /var/lib/cloud/*
 
 ### remove address bindings as they are generated on boot
 rm -f /etc/udev/rules.d/70*
@@ -69,13 +77,3 @@ rm -f /var/log/*-* /var/log/*.gz 2>/dev/null
 ### Clearing User History
 history -c
 unset HISTFILE
-
-## python & ansible tools
-#apt-get install python36 python36-devel python36-setuptools python-dnf
-#easy_install-3.6 pip
-#pip3 install --upgrade pip
-
-# sudo sed -i s/"#PermitRootLogin prohibit-password"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
-# systemctl restart sshd
-# passwrd root
-# 

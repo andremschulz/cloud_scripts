@@ -1,6 +1,6 @@
 Cloudstack database:
-- template_store_ref -  ISO repository
-- vm_template - 
+- template_store_ref -  ISO/template repository
+- vm_template -  ISO/template repository
 
 
 system VMs diagnostic command
@@ -10,11 +10,33 @@ ssh -i /root/.ssh/id_rsa.cloud -p 3922 169.254.150.152
 /usr/local/cloud/systemvm/ssvm-check.sh
 
 
-- Cannot upload ISO from localhost - ERR_CERT_COMMON_NAME_INVALID 
-
-
 The trafficlabel for VMWARE is in the format "vSwtichName,VLAN,typeofswitch", the default for ESX being " vSwitch0,,vmwaresvs"
 
 
 ### how to enable Kubernetes service
 
+
+Kubernetes steps:
+1. enable in global config
+2. /usr/share/cloudstack-common/scripts/util/create-kubernetes-binaries-iso.sh to register iso
+
+
+
+
+ldapsearch -h <ldap-id> -x -v "uid=lch.go" -D "cn=yr.k" -W
+
+Make network offerings private
+
+SSVMS:
+- global settings - set ntp 
+- global settings - set SSL certificate
+
+Configure user role expunge preferences:
+- allow.user.expunge.recover.vm     - false
+- allow.user.expunge.recover.volume - false
+- expunge.delay - 604800 
+
+incorrect login attempts
+cloudmonkey update configuration name=incorrect.login.attempts.allowed value=20
+
+certificate tls is for 2 years
