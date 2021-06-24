@@ -40,7 +40,8 @@ ssh_pwauth: 1" > /etc/cloud/cloud.cfg.d/80_root.cfg
  
 ## Enable SSH keys integration
 sudo sed -i s/" - ssh$"/" - [ssh, always]"/g /etc/cloud/cloud.cfg
-
+echo "ssh_deletekeys: false" > /etc/cloud/cloud.cfg.d/49_hostkeys.cfg
+	
 ## Enable XFS root partition auto resize
 echo "growpart:
     mode: auto

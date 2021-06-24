@@ -36,7 +36,15 @@ Configure user role expunge preferences:
 - allow.user.expunge.recover.volume - false
 - expunge.delay - 604800 
 
+upload custom logo and banners
+
+
 incorrect login attempts
 cloudmonkey update configuration name=incorrect.login.attempts.allowed value=20
 
 certificate tls is for 2 years
+test if loically deleted VM takes space from user - non expunged removed VMs still take resource from users.
+change ntp of ssvms to local ntp
+
+SVG asset/banner - 700 x 110
+SVG asset/logo - 256 x 64
