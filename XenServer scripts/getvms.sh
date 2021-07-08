@@ -12,6 +12,6 @@ done < "$filename"
 
 
 
-vbds=$(xe vm-list name-label=$line params=VBDs|cut -d':' -f2)
+#vbds=$(xe vm-list name-label=$line params=VBDs|cut -d':' -f2)
 
-vdi=$(xe vbd-list uuid=6dfac922-9401-e16a-5833-7152f9f39b81 params=vdi-uuid |cut -d' ' -f8)
+#vdi=$(xe vbd-list uuid=6dfac922-9401-e16a-5833-7152f9f39b81 params=vdi-uuid |cut -d' ' -f8)

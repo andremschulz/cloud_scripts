@@ -48,3 +48,34 @@ change ntp of ssvms to local ntp
 
 SVG asset/banner - 700 x 110
 SVG asset/logo - 256 x 64
+
+
+
+Thanks for the tip, worked fine.
+
+Best regards.
+
+
+
+> Can you check the config setting 'capacity.skipcounting.hours ', which is the wait time before releasing the VM resources.
+>
+> The setting 'host.reservation.release.period' is the time interval to check and release the host reservations, but the resources are not released until the duration specified through 'capacity.skipcounting.hours' setting after VM is stopped.
+
+>
+>      Hello all.
+>
+>      Some days ago I asked how to release the resources when my instances
+>      been halted. A member reply me with "host.reservation.release.period"
+>      setting, on global configuration. I changed to 5, the statement, reboot
+>      the CloudStack service but it is not releasing the resources and it is
+>      showing me this messages in the management server:
+>
+>      2021-06-25 09:45:54,680 DEBUG [c.c.d.DeploymentPlanningManagerImpl]
+>      (HostReservationReleaseChecker:ctx-6a943f41) (logid:fa97e34d) Checking
+>      if any host reservation can be released ...
+>      2021-06-25 09:45:54,686 DEBUG [c.c.d.DeploymentPlanningManagerImpl]
+>      (HostReservationReleaseChecker:ctx-6a943f41) (logid:fa97e34d) Cannot
+>      release reservation, Found VM: VM[User|i-5-106-VM] Stopped but reserved
+>      on host 1
+
+>
