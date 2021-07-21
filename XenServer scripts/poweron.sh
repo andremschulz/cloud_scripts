@@ -46,12 +46,12 @@ do
 	fi
 	if [ "$state" == "status" ]; then
 		power=$(xe vm-param-get uuid=$vm_id param-name=other-config param-key=auto_poweron 2> /dev/null)
-		if [ "$?" != "0" ]; then
+		if [ "$power" != "true" ]; then
 			power="false"
 		fi
 		echo "$i VM autopoweron is set to $power."
 	else
-		xe vm-param-set uuid=$vm_id other-config:auto_poweron=true
+		xe vm-param-set uuid=$vm_id other-config:auto_poweron=$state
 		if [ "$?" != "0" ];	then
 			echo "VM $i poweron state could not be set."
 		else
